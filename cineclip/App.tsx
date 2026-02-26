@@ -110,35 +110,41 @@ export default function App() {
     );
   }
 
-  return (
-    <>
-      {screen === 'alias' && (
-        <AliasView onRegistered={handleRegistered} />
-      )}
-      {screen === 'game' && (
-        <GameView
-          alias={alias}
-          onGameOver={handleGameOver}
-          onLogout={handleLogout}
-          onGoToRanking={() => {
-            setPreviousScreen('game');
-            setScreen('ranking');
-          }}
-        />
-      )}
-      {screen === 'result' && lastGame && (
-        <ResultView
-          game={lastGame}
-          onNewGame={handleNewGame}
-          onGoToRanking={() => {
-            setPreviousScreen('result');
-            setScreen('ranking');
-          }}
-        />
-      )}
-      {screen === 'ranking' && (
-        <RankingView onBack={() => setScreen(previousScreen)} />
-      )}
-    </>
-  );
+ return (
+  <>
+    {screen === 'alias' && (
+      <AliasView onRegistered={handleRegistered} />
+    )}
+    {screen === 'game' && (
+      <GameView
+        alias={alias}
+        onGameOver={handleGameOver}
+        onLogout={handleLogout}
+        onGoToRanking={() => {
+          setPreviousScreen('game');
+          setScreen('ranking');
+        }}
+      />
+    )}
+    {screen === 'result' && lastGame && (
+      <ResultView
+        game={lastGame}
+        alias={alias}
+        onNewGame={handleNewGame}
+        onLogout={handleLogout}
+        onGoToRanking={() => {
+          setPreviousScreen('result');
+          setScreen('ranking');
+        }}
+      />
+    )}
+    {screen === 'ranking' && (
+      <RankingView
+        alias={alias}
+        onBack={() => setScreen(previousScreen)}
+        onLogout={handleLogout}
+      />
+    )}
+  </>
+);
 }

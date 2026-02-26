@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
@@ -14,6 +13,7 @@ import { SearchInput } from '../components/SearchInput';
 import { HintList } from '../components/HintList';
 import { ScoreCard } from '../components/ScoreCard';
 import { Game } from '../../domain/entities/Game';
+import { styles } from './GameView.styles'
 
 /**
  * Props de GameView.
@@ -134,81 +134,3 @@ export function GameView({ alias, onGameOver, onGoToRanking, onLogout }: GameVie
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1A3A5C',
-  },
-  content: {
-    padding: 16,
-    gap: 12,
-  },
-  centered: {
-    flex: 1,
-    backgroundColor: '#1A3A5C',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  aliasText: {
-    color: '#F9A825',
-    fontSize: 14,
-  },
-  rankingLink: {
-    color: '#F9A825',
-    fontSize: 14,
-  },
-  logoutLink: {
-    color: '#FF6B6B',
-    fontSize: 14,
-  },
-  loadingText: {
-    color: '#AAAAAA',
-    marginTop: 12,
-    fontSize: 16,
-  },
-  errorText: {
-    color: '#FF6B6B',
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  retryButton: {
-    backgroundColor: '#F9A825',
-    borderRadius: 8,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-  },
-  retryText: {
-    color: '#1A3A5C',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  skipButton: {
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#2A4A6C',
-  },
-  skipText: {
-    color: '#AAAAAA',
-    fontSize: 15,
-  },
-});

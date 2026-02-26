@@ -35,6 +35,10 @@ export class RegisterUser implements IRegisterUser {
     if (alias.trim().length > 20) {
       throw new Error('El alias no puede superar los 20 caracteres.');
     }
+    // Validar que el alias no contenga espacios
+    if (/\s/.test(alias)) {
+        throw new Error('El alias no puede contener espacios.');
+    }
 
     // Validar contraseña
     if (password.length < 6) {

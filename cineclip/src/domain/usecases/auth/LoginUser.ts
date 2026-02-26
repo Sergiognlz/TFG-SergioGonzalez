@@ -26,6 +26,10 @@ export class LoginUser implements ILoginUser {
     if (password.length < 6) {
       throw new Error('La contraseña debe tener al menos 6 caracteres.');
     }
+    // Validar que el alias no contenga espacios
+    if (/\s/.test(alias)) {
+        throw new Error('El alias no puede contener espacios.');
+    }
     await this.authRepository.login(alias, password);
   }
 }
