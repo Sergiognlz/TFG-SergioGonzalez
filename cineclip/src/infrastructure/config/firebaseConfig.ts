@@ -1,11 +1,16 @@
+
+
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 /**
  * Configuración de conexión con Firebase.
  * Estos valores identifican el proyecto de Firebase de CineClip.
- * Son públicos por diseño (no son credenciales de acceso),
- * pero la API Key de TMDB sí debe mantenerse privada.
+ * Son públicos por diseño (no son credenciales de acceso).
+ * 
+ * IMPORTANTE: Sustituir los valores por los de tu proyecto Firebase
+ * antes de ejecutar la aplicación.
  */
 const firebaseConfig = {
 apiKey: "AIzaSyCPJJ94GOX8Yc0pRALOeZ3DP5KkSL19rx0",
@@ -24,3 +29,9 @@ const app = initializeApp(firebaseConfig);
  * Se importa desde aquí en los repositorios de la capa data.
  */
 export const db = getFirestore(app);
+
+/**
+ * Instancia de Firebase Authentication lista para usar.
+ * Se importa desde aquí en el repositorio de autenticación.
+ */
+export const auth = getAuth(app);

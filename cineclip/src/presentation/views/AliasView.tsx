@@ -9,44 +9,72 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { registerPlayer } from '../../di/container';
+import { loginUser, registerUser } from '../../di/container';
 
 /**
  * Props de AliasView.
  */
 interface AliasViewProps {
-  /** Función llamada cuando el jugador se registra correctamente.
-   * Recibe el alias registrado para pasarlo al resto de la app. */
+  /** Función llamada cuando el jugador se autentica correctamente.
+   * Recibe el alias para pasarlo al resto de la app. */
   onRegistered: (alias: string) => void;
 }
 
 /**
- * Vista de registro de alias.
- * Es la primera pantalla que ve el jugador.
- * Responsabilidad única (SOLID - S): solo gestiona
- * el registro del alias antes de empezar a jugar.
+ * Modos posibles del formulario.
+ * - 'login': el jugador ya tiene cuenta y quiere iniciar sesión.
+ * - 'register': el jugador es nuevo y quiere crear una cuenta.
+ */
+type FormMode = 'login' | 'register';
+
+/**
+ * Vista de autenticación.
+ * Permite al jugador registrarse con un alias y contraseña nuevos,
+ * o iniciar sesión si ya tiene cuenta.
+ * Responsabilidad única (SOLID - S): solo gestiona la autenticación
+ * antes de acceder al juego.
  */
 export function AliasView({ onRegistered }: AliasViewProps) {
+  /** Modo actual del formulario: login o registro. */
+  const [mode, setMode] = useState<FormMode>('login');
+
   const [alias, setAlias] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   /**
-   * Gestiona el registro del alias.
-   * Llama al caso de uso RegisterPlayer y navega al juego si tiene éxito.
+   * Gestiona el envío del formulario según el modo activo.
+   * En modo registro crea la cuenta y el perfil del jugador.
+   * En modo login valida las credenciales existentes.
    */
-  const handleRegister = async () => {
+  const handleSubmit = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      await registerPlayer.execute(alias);
+      if (mode === 'register') {
+        await registerUser.execute(alias, password);
+      } else {
+        await loginUser.execute(alias, password);
+      }
       onRegistered(alias.trim());
     } catch (e: any) {
-      setError(e.message ?? 'Error al registrar el alias.');
+      setError(e.message ?? 'Error al autenticar. Inténtalo de nuevo.');
     } finally {
       setLoading(false);
     }
+  };
+
+  /**
+   * Cambia entre modo login y registro.
+   * Limpia los errores y el formulario al cambiar de modo.
+   */
+  const toggleMode = () => {
+    setMode(prev => prev === 'login' ? 'register' : 'login');
+    setError(null);
+    setAlias('');
+    setPassword('');
   };
 
   return (
@@ -58,7 +86,29 @@ export function AliasView({ onRegistered }: AliasViewProps) {
       <Text style={styles.subtitle}>¿De qué película es este fotograma?</Text>
 
       <View style={styles.form}>
-        <Text style={styles.label}>Elige tu alias para empezar</Text>
+
+        {/* Selector de modo login / registro */}
+        <View style={styles.modeSelector}>
+          <TouchableOpacity
+            style={[styles.modeButton, mode === 'login' && styles.modeButtonActive]}
+            onPress={() => { setMode('login'); setError(null); }}
+          >
+            <Text style={[styles.modeButtonText, mode === 'login' && styles.modeButtonTextActive]}>
+              Iniciar sesión
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.modeButton, mode === 'register' && styles.modeButtonActive]}
+            onPress={() => { setMode('register'); setError(null); }}
+          >
+            <Text style={[styles.modeButtonText, mode === 'register' && styles.modeButtonTextActive]}>
+              Registrarse
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Campo alias */}
+        <Text style={styles.label}>Alias</Text>
         <TextInput
           style={styles.input}
           value={alias}
@@ -67,21 +117,47 @@ export function AliasView({ onRegistered }: AliasViewProps) {
           placeholderTextColor="#888"
           maxLength={20}
           autoCorrect={false}
+          autoCapitalize="none"
         />
 
+        {/* Campo contraseña */}
+        <Text style={styles.label}>Contraseña</Text>
+        <TextInput
+          style={styles.input}
+          value={password}
+          onChangeText={setPassword}
+          placeholder="Mínimo 6 caracteres"
+          placeholderTextColor="#888"
+          secureTextEntry
+        />
+
+        {/* Mensaje de error */}
         {error && <Text style={styles.error}>{error}</Text>}
 
+        {/* Botón principal */}
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleRegister}
+          onPress={handleSubmit}
           disabled={loading}
         >
           {loading ? (
             <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text style={styles.buttonText}>Empezar a jugar</Text>
+            <Text style={styles.buttonText}>
+              {mode === 'login' ? 'Entrar' : 'Crear cuenta'}
+            </Text>
           )}
         </TouchableOpacity>
+
+        {/* Enlace para cambiar de modo */}
+        <TouchableOpacity style={styles.toggleButton} onPress={toggleMode}>
+          <Text style={styles.toggleText}>
+            {mode === 'login'
+              ? '¿No tienes cuenta? Regístrate'
+              : '¿Ya tienes cuenta? Inicia sesión'}
+          </Text>
+        </TouchableOpacity>
+
       </View>
     </KeyboardAvoidingView>
   );
@@ -111,10 +187,34 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 400,
   },
+  modeSelector: {
+    flexDirection: 'row',
+    backgroundColor: '#0F2A45',
+    borderRadius: 8,
+    padding: 4,
+    marginBottom: 24,
+  },
+  modeButton: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 6,
+  },
+  modeButtonActive: {
+    backgroundColor: '#F9A825',
+  },
+  modeButtonText: {
+    color: '#AAAAAA',
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  modeButtonTextActive: {
+    color: '#1A3A5C',
+  },
   label: {
     color: '#FFFFFF',
-    fontSize: 16,
-    marginBottom: 12,
+    fontSize: 14,
+    marginBottom: 6,
   },
   input: {
     backgroundColor: '#1E3A5C',
@@ -123,7 +223,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     color: '#FFFFFF',
     fontSize: 16,
-    marginBottom: 12,
+    marginBottom: 16,
     borderWidth: 1,
     borderColor: '#2A4A6C',
   },
@@ -137,6 +237,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: 'center',
+    marginBottom: 12,
   },
   buttonDisabled: {
     opacity: 0.6,
@@ -145,5 +246,13 @@ const styles = StyleSheet.create({
     color: '#1A3A5C',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  toggleButton: {
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  toggleText: {
+    color: '#AAAAAA',
+    fontSize: 14,
   },
 });

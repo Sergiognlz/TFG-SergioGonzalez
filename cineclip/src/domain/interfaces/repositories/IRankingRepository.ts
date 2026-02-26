@@ -1,5 +1,5 @@
-import { Player } from '../entities/Player';
-import { Score } from '../entities/Score';
+import { Player } from '../../entities/Player';
+import { Score } from '../../entities/Score';
 
 /**
  * Contrato que define las operaciones de persistencia del ranking y jugadores.
@@ -8,7 +8,7 @@ import { Score } from '../entities/Score';
  * Si en el futuro se cambia Firebase por otra base de datos,
  * solo hay que crear una nueva implementación de esta interfaz.
  */
-export interface RankingRepository {
+export interface IRankingRepository {
   /**
    * Guarda o actualiza los datos de un jugador en la base de datos.
    * Si el alias no existe lo crea, si existe lo actualiza.

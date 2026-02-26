@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { useRanking } from '../hooks/useRanking';
+import { useRanking } from '../viewModels/useRanking';
 import { Score } from '../../domain/entities/Score';
 
 /**

@@ -1,5 +1,5 @@
 import { Movie } from '../../domain/entities/Movie';
-import { MovieRepository } from '../../domain/repositories/MovieRepository';
+import { IMovieRepository } from '../../domain/interfaces/repositories/IMovieRepository';
 import { tmdbGet, TMDB_IMAGE_BASE_URL } from '../../infrastructure/http/tmdbClient';
 import { POPULAR_MOVIE_IDS, MAX_BACKDROPS } from '../../infrastructure/config/tmdbConfig';
 
@@ -30,7 +30,7 @@ interface TmdbImagesResponse {
  * la lógica de negocio nunca importa esta clase directamente,
  * sino la interfaz MovieRepository.
  */
-export class TmdbMovieRepository implements MovieRepository {
+export class TmdbMovieRepository implements IMovieRepository {
 
   /**
    * Obtiene una película aleatoria de la lista de populares con todos sus datos.

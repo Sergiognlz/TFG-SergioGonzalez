@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { useGame } from '../hooks/useGame';
-import { useSearch } from '../hooks/useSearch';
+import { useGame } from '../viewModels/useGame';
+import { useSearch } from '../viewModels/useSearch';
 import { BackdropImage } from '../components/BackdropImage';
 import { SearchInput } from '../components/SearchInput';
 import { HintList } from '../components/HintList';
@@ -21,11 +21,12 @@ import { Game } from '../../domain/entities/Game';
 interface GameViewProps {
   /** Alias del jugador activo. Se usa para guardar la puntuación. */
   alias: string;
-  
-  /** Función llamada cuando la partida termina (win o loss). */
-onGameOver: (game: Game) => void;
+  /** Función llamada solo cuando el jugador agota los 5 intentos (game over). */
+  onGameOver: (game: Game) => void;
   /** Función llamada para navegar al ranking. */
   onGoToRanking: () => void;
+  /** Función llamada para cerrar sesión y volver a la pantalla de alias. */
+  onLogout: () => void;
 }
 
 /**
@@ -33,10 +34,11 @@ onGameOver: (game: Game) => void;
  * Muestra el backdrop activo, el campo de búsqueda con autocompletado,
  * las pistas acumuladas y el estado de la partida.
  * Responsabilidad única (SOLID - S): solo se ocupa de renderizar
- * el estado del juego que le proporcionan los hooks (ViewModels).
+ * el estado del juego que le proporcionan los ViewModels.
+ * La lógica de negocio reside en useGame y useSearch.
  */
-export function GameView({ alias, onGameOver, onGoToRanking }: GameViewProps) {
-  const { game, loading, error, initGame, handleAnswer } = useGame(alias);
+export function GameView({ alias, onGameOver, onGoToRanking, onLogout }: GameViewProps) {
+  const { game, sessionScore, loading, error, initGame, handleAnswer } = useGame(alias);
   const { results, searching, search, clearResults } = useSearch();
 
   /** Iniciar la primera partida al montar la vista. */
@@ -44,12 +46,12 @@ export function GameView({ alias, onGameOver, onGoToRanking }: GameViewProps) {
     initGame();
   }, []);
 
-  /** Navegar a resultado cuando la partida termina. */
-useEffect(() => {
-  if (game?.result === 'win' || game?.result === 'loss') {
-    onGameOver(game);
-  }
-}, [game?.result]);
+  /** Navegar a resultado solo cuando hay game over. */
+  useEffect(() => {
+    if (game?.result === 'loss') {
+      onGameOver(game);
+    }
+  }, [game?.result]);
 
   if (loading) {
     return (
@@ -83,24 +85,30 @@ useEffect(() => {
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
-      {/* Título y botón de ranking */}
+      {/* Título, usuario y botones de navegación */}
       <View style={styles.header}>
         <Text style={styles.title}>CineClip</Text>
-        <TouchableOpacity onPress={onGoToRanking}>
-          <Text style={styles.rankingLink}>Ranking</Text>
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          <Text style={styles.aliasText}>👤 {alias}</Text>
+          <TouchableOpacity onPress={onGoToRanking}>
+            <Text style={styles.rankingLink}>Ranking</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onLogout}>
+            <Text style={styles.logoutLink}>Salir</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Backdrop de la película */}
       <BackdropImage url={currentBackdropUrl} />
 
-      {/* Estado de la partida */}
+      {/* Estado de la partida: puntuación acumulada e intentos restantes */}
       <ScoreCard
-        score={game.score}
+        score={sessionScore}
         attemptsLeft={game.attemptsLeft}
       />
 
-      {/* Pistas desveladas */}
+      {/* Pistas desveladas tras cada fallo */}
       <HintList hints={game.hintsRevealed} />
 
       {/* Campo de búsqueda con autocompletado */}
@@ -114,6 +122,14 @@ useEffect(() => {
         }}
         onClear={clearResults}
       />
+
+      {/* Botón para saltar si no se sabe la película */}
+      <TouchableOpacity
+        style={styles.skipButton}
+        onPress={() => handleAnswer(-1)}
+      >
+        <Text style={styles.skipText}>Pasar →</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -145,9 +161,22 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  aliasText: {
+    color: '#F9A825',
+    fontSize: 14,
+  },
   rankingLink: {
     color: '#F9A825',
-    fontSize: 16,
+    fontSize: 14,
+  },
+  logoutLink: {
+    color: '#FF6B6B',
+    fontSize: 14,
   },
   loadingText: {
     color: '#AAAAAA',
@@ -170,5 +199,16 @@ const styles = StyleSheet.create({
     color: '#1A3A5C',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  skipButton: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#2A4A6C',
+  },
+  skipText: {
+    color: '#AAAAAA',
+    fontSize: 15,
   },
 });

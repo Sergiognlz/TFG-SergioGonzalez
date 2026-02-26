@@ -1,4 +1,4 @@
-import { Movie } from '../entities/Movie';
+import { Movie } from '../../entities/Movie';
 
 /**
  * Contrato que define las operaciones disponibles sobre películas.
@@ -8,7 +8,7 @@ import { Movie } from '../entities/Movie';
  * Si en el futuro se cambia TMDB por otra fuente de datos,
  * solo hay que crear una nueva implementación de esta interfaz.
  */
-export interface MovieRepository {
+export interface IMovieRepository {
   /**
    * Obtiene una película aleatoria con todos sus datos y backdrops.
    * @returns Promise con la entidad Movie completa lista para jugar.

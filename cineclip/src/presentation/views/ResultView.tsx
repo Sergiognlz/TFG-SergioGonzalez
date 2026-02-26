@@ -22,10 +22,11 @@ interface ResultViewProps {
 
 /**
  * Vista de resultado de la partida.
- * Muestra si el jugador ha ganado o perdido, la puntuación obtenida
- * y los metadatos completos de la película en español.
+ * Muestra el resultado final (GAME OVER o victoria), la puntuación
+ * acumulada en la sesión y los metadatos completos de la película
+ * que no se pudo adivinar.
  * Responsabilidad única (SOLID - S): solo se ocupa de renderizar
- * el resultado final de la partida.
+ * el resultado final de la sesión.
  */
 export function ResultView({ game, onNewGame, onGoToRanking }: ResultViewProps) {
   const isWin = game.result === 'win';
@@ -35,19 +36,32 @@ export function ResultView({ game, onNewGame, onGoToRanking }: ResultViewProps) 
       style={styles.container}
       contentContainerStyle={styles.content}
     >
-      {/* Resultado principal */}
+      {/* Banner principal de resultado */}
       <View style={[styles.resultBanner, isWin ? styles.winBanner : styles.lossBanner]}>
-        <Text style={styles.resultEmoji}>{isWin ? '🎬' : '😞'}</Text>
-        <Text style={styles.resultTitle}>
-          {isWin ? '¡Correcto!' : '¡Tiempo agotado!'}
-        </Text>
-        {isWin && (
-          <Text style={styles.scoreText}>+{game.score} puntos</Text>
+        {isWin ? (
+          <>
+            <Text style={styles.resultEmoji}>🎬</Text>
+            <Text style={styles.resultTitle}>¡Correcto!</Text>
+          </>
+        ) : (
+          <>
+            <Text style={styles.gameOverText}>GAME OVER</Text>
+            <Text style={styles.gameOverSub}>Has perdido</Text>
+          </>
         )}
+
+        {/* Puntuación acumulada de la sesión */}
+        <View style={styles.scoreBadge}>
+          <Text style={styles.scoreLabel}>PUNTUACIÓN FINAL</Text>
+          <Text style={styles.scoreValue}>{game.score}</Text>
+        </View>
       </View>
 
-      {/* Metadatos de la película */}
+      {/* Película que no se pudo adivinar */}
       <View style={styles.movieCard}>
+        <Text style={styles.movieCardLabel}>
+          {isWin ? 'Película adivinada' : 'La película era...'}
+        </Text>
         <Text style={styles.movieTitle}>{game.movie.title}</Text>
         {game.movie.originalTitle !== game.movie.title && (
           <Text style={styles.originalTitle}>({game.movie.originalTitle})</Text>
@@ -73,7 +87,7 @@ export function ResultView({ game, onNewGame, onGoToRanking }: ResultViewProps) 
 
       {/* Botones de acción */}
       <TouchableOpacity style={styles.primaryButton} onPress={onNewGame}>
-        <Text style={styles.primaryButtonText}>Nueva partida</Text>
+        <Text style={styles.primaryButtonText}>Jugar de nuevo</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.secondaryButton} onPress={onGoToRanking}>
@@ -96,33 +110,72 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 24,
     alignItems: 'center',
+    gap: 8,
   },
   winBanner: {
     backgroundColor: '#1E5C2A',
   },
   lossBanner: {
-    backgroundColor: '#5C1E1E',
+    backgroundColor: '#1A0A0A',
+    borderWidth: 2,
+    borderColor: '#FF3333',
   },
   resultEmoji: {
     fontSize: 48,
-    marginBottom: 8,
   },
   resultTitle: {
     fontSize: 28,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    marginBottom: 4,
   },
-  scoreText: {
-    fontSize: 22,
-    color: '#F9A825',
+  gameOverText: {
+    fontSize: 48,
     fontWeight: 'bold',
+    color: '#FF3333',
+    letterSpacing: 6,
+    textShadowColor: '#FF0000',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 8,
+  },
+  gameOverSub: {
+    fontSize: 18,
+    color: '#AAAAAA',
+    letterSpacing: 2,
+  },
+  scoreBadge: {
+    marginTop: 12,
+    backgroundColor: '#000000',
+    borderRadius: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#F9A825',
+  },
+  scoreLabel: {
+    color: '#F9A825',
+    fontSize: 12,
+    letterSpacing: 3,
+    fontWeight: 'bold',
+  },
+  scoreValue: {
+    color: '#FFFFFF',
+    fontSize: 48,
+    fontWeight: 'bold',
+    letterSpacing: 4,
   },
   movieCard: {
     backgroundColor: '#1E3A5C',
     borderRadius: 12,
     padding: 20,
     gap: 12,
+  },
+  movieCardLabel: {
+    color: '#AAAAAA',
+    fontSize: 12,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    marginBottom: 4,
   },
   movieTitle: {
     fontSize: 22,

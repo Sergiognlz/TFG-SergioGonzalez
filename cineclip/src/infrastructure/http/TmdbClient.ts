@@ -27,15 +27,17 @@ export async function tmdbGet<T>(
   endpoint: string,
   params: Record<string, string> = {},
 ): Promise<T> {
+  // Log temporal para verificar que la API Key se lee correctamente
+  console.log('API KEY:', process.env.EXPO_PUBLIC_TMDB_API_KEY);
+
   // Construir la query string con los parámetros adicionales
   const queryParams = new URLSearchParams({
-    api_key: process.env.TMDB_API_KEY ?? '',
+    api_key: process.env.EXPO_PUBLIC_TMDB_API_KEY ?? '',
     language: LANGUAGE,
     ...params,
   });
 
   const url = `${TMDB_BASE_URL}${endpoint}?${queryParams.toString()}`;
-
   const response = await fetch(url);
 
   if (!response.ok) {

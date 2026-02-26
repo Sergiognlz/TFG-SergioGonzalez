@@ -12,7 +12,7 @@ import {
 import { db } from '../../infrastructure/config/firebaseConfig';
 import { Player } from '../../domain/entities/Player';
 import { Score } from '../../domain/entities/Score';
-import { RankingRepository } from '../../domain/repositories/RankingRepository';
+import { IRankingRepository } from '../../domain/interfaces/repositories/IRankingRepository';
 
 /**
  * Implementación concreta de RankingRepository usando Firebase Firestore.
@@ -24,7 +24,7 @@ import { RankingRepository } from '../../domain/repositories/RankingRepository';
  * - /jugadores/{alias} → datos del jugador
  * - /ranking/{alias}   → puntuación máxima para el ranking global
  */
-export class FirebaseRankingRepository implements RankingRepository {
+export class FirebaseRankingRepository implements IRankingRepository {
 
   /**
    * Guarda o actualiza los datos de un jugador en Firestore.

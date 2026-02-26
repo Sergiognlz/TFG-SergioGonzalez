@@ -1,6 +1,6 @@
+import { ISubmitAnswer } from '../interfaces/usecases/ISubmitAnswer';
+import { IMovieRepository } from '../interfaces/repositories/IMovieRepository';
 import { GameResult } from '../entities/Game';
-import { MovieRepository } from '../repositories/MovieRepository';
-import { RankingRepository } from '../repositories/RankingRepository';
 
 /**
  * Resultado devuelto al validar la respuesta del jugador.
@@ -18,26 +18,26 @@ export interface AnswerResult {
 
 /**
  * Caso de uso: Validar la respuesta del jugador.
- * Responsabilidad única (SOLID - S): gestiona la lógica de validación,
- * el cálculo de puntuación, las pistas y la actualización del ranking.
- * Es el caso de uso más importante de la aplicación.
+ * Responsabilidad única (SOLID - S): gestiona únicamente la lógica
+ * de validación, el cálculo de puntuación y las pistas.
+ * La persistencia de la puntuación final se delega a SaveSessionScore,
+ * reforzando el principio de Responsabilidad Única.
+ * Implementa ISubmitAnswer siguiendo el principio de
+ * Inversión de Dependencias (SOLID - D).
  */
-export class SubmitAnswer {
+export class SubmitAnswer implements ISubmitAnswer {
   /**
-   * @param movieRepository Repositorio de películas para obtener pistas.
-   * @param rankingRepository Repositorio de ranking para guardar la puntuación.
+   * @param movieRepository Repositorio de películas. Inyectado desde el contenedor DI.
    */
-  constructor(
-    private readonly movieRepository: MovieRepository,
-    private readonly rankingRepository: RankingRepository,
-  ) {}
+  constructor(private readonly movieRepository: IMovieRepository) {}
 
   /**
-   * Ejecuta el caso de uso: valida la respuesta y actualiza el estado de la partida.
-   * @param selectedMovieId ID de TMDB de la película seleccionada por el jugador.
+   * Ejecuta el caso de uso: valida la respuesta y devuelve el resultado.
+   * @param selectedMovieId ID de TMDB de la película seleccionada. -1 si el jugador pasa.
    * @param activeMovieId ID de TMDB de la película activa en la partida.
    * @param attemptsLeft Intentos restantes antes de esta respuesta.
-   * @param alias Alias del jugador para guardar la puntuación si acierta.
+   * @param alias Alias del jugador (mantenido por compatibilidad con la interfaz).
+   * @param activeMovie Metadatos de la película activa para generar las pistas.
    * @returns Promise con el resultado de la validación.
    */
   async execute(
@@ -48,26 +48,37 @@ export class SubmitAnswer {
     activeMovie: { year: number; director: string; genre: string; cast: string[] },
   ): Promise<AnswerResult> {
 
+    // Si el jugador pasa (-1), contar como fallo sin validar título
+    if (selectedMovieId === -1) {
+      const remainingAfter = attemptsLeft - 1;
+      if (remainingAfter === 0) {
+        return { isCorrect: false, gameResult: 'loss', score: 0, hint: null };
+      }
+      const failNumber = 5 - remainingAfter;
+      const hint = this.getHint(failNumber, activeMovie);
+      return { isCorrect: false, gameResult: 'playing', score: 0, hint };
+    }
+
     const isCorrect = selectedMovieId === activeMovieId;
 
     if (isCorrect) {
-      // Calcular puntuación: más intentos restantes = más puntos
-      const score = (attemptsLeft) * 100;
-      await this.rankingRepository.updateScore(alias, score);
+      // Acierto: calcular puntuación de esta película
+      // La acumulación de puntuación total se gestiona en useGame (ViewModel)
+      const score = attemptsLeft * 100;
       return { isCorrect: true, gameResult: 'win', score, hint: null };
     }
 
+    // Respuesta incorrecta: calcular intentos restantes
     const remainingAfter = attemptsLeft - 1;
 
     if (remainingAfter === 0) {
-      // Sin intentos: partida perdida, puntuación 0
+      // Sin intentos: game over
       return { isCorrect: false, gameResult: 'loss', score: 0, hint: null };
     }
 
-    // Determinar qué pista mostrar según el número de fallo
+    // Quedan intentos: devolver pista del fallo actual
     const failNumber = 5 - remainingAfter;
     const hint = this.getHint(failNumber, activeMovie);
-
     return { isCorrect: false, gameResult: 'playing', score: 0, hint };
   }
 
@@ -75,7 +86,7 @@ export class SubmitAnswer {
    * Genera la pista correspondiente al número de fallo actual.
    * @param failNumber Número de fallo (1-4).
    * @param movie Metadatos de la película activa.
-   * @returns Texto de la pista o null si no hay pista disponible.
+   * @returns Texto de la pista o null si no corresponde pista.
    */
   private getHint(
     failNumber: number,

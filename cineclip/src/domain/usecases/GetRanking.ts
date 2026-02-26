@@ -1,16 +1,19 @@
+import { IGetRanking } from '../interfaces/usecases/IGetRanking';
+import { IRankingRepository } from '../interfaces/repositories/IRankingRepository';
 import { Score } from '../entities/Score';
-import { RankingRepository } from '../repositories/RankingRepository';
 
 /**
  * Caso de uso: Obtener el ranking global de jugadores.
  * Responsabilidad única (SOLID - S): solo se ocupa de recuperar
  * la lista de puntuaciones ordenada para mostrarla al jugador.
+ * Implementa IGetRanking siguiendo el principio de
+ * Inversión de Dependencias (SOLID - D).
  */
-export class GetRanking {
+export class GetRanking implements IGetRanking {
   /**
    * @param rankingRepository Implementación inyectada del repositorio de ranking.
    */
-  constructor(private readonly rankingRepository: RankingRepository) {}
+  constructor(private readonly rankingRepository: IRankingRepository) {}
 
   /**
    * Ejecuta el caso de uso: obtiene el ranking global.
