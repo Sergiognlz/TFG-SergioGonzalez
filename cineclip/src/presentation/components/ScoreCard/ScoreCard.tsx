@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-
+import { View, Text} from 'react-native';
+import { styles } from './ScoreCard.styles';
 /**
  * Props del componente ScoreCard.
  */
@@ -17,6 +17,8 @@ interface ScoreCardProps {
  * la información de estado de la partida.
  */
 export function ScoreCard({ score, attemptsLeft }: ScoreCardProps) {
+  console.log('ScoreCard - score:', score, 'attemptsLeft:', attemptsLeft);
+  
   return (
     <View style={styles.container}>
       <View style={styles.item}>
@@ -32,32 +34,3 @@ export function ScoreCard({ score, attemptsLeft }: ScoreCardProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    backgroundColor: '#1E3A5C',
-    borderRadius: 8,
-    padding: 12,
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    width: '100%',
-  },
-  item: {
-    alignItems: 'center',
-  },
-  label: {
-    color: '#AAAAAA',
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  value: {
-    color: '#F9A825',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  divider: {
-    width: 1,
-    height: 40,
-    backgroundColor: '#2A4A6C',
-  },
-});

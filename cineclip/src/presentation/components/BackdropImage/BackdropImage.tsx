@@ -1,6 +1,6 @@
 import React from 'react';
-import { Image, StyleSheet, View, ActivityIndicator } from 'react-native';
-
+import { Image,View, ActivityIndicator } from 'react-native';
+import { styles } from './BackdropImage.styles';
 /**
  * Props del componente BackdropImage.
  */
@@ -32,41 +32,18 @@ export function BackdropImage({ url }: BackdropImageProps) {
       {error ? (
         <View style={styles.placeholder} />
       ) : (
-        <Image
-          source={{ uri: url }}
-          style={styles.image}
-          resizeMode="cover"
-          onLoad={() => setLoading(false)}
-          onError={() => {
-            setLoading(false);
-            setError(true);
-          }}
-        />
+      <Image
+  source={{ uri: url }}
+  style={styles.image}
+  resizeMode="cover"
+  onLoad={() => setLoading(false)}
+  onError={() => {
+    setLoading(false);
+    setError(true);
+  }}
+/>
       )}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    aspectRatio: 16 / 9,
-    backgroundColor: '#111',
-    borderRadius: 12,
-    overflow: 'hidden',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-  },
-  loader: {
-    position: 'absolute',
-  },
-  placeholder: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#222',
-  },
-});

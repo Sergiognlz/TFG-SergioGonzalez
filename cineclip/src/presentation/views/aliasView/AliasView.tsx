@@ -8,7 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { loginUser, registerUser } from '../../di/container';
+import { loginUser, registerUser } from '../../../di/container';
 import { styles } from './AliasView.styles'
 /**
  * Props de AliasView.

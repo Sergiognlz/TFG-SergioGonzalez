@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-
+import { View, Text } from 'react-native';
+import { styles } from './HintList.styles';
 /**
  * Props del componente HintList.
  */
@@ -29,26 +29,3 @@ export function HintList({ hints }: HintListProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    backgroundColor: '#1E3A5C',
-    borderRadius: 8,
-    padding: 12,
-    marginVertical: 8,
-  },
-  hintRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  bullet: {
-    color: '#F9A825',
-    fontSize: 16,
-    marginRight: 8,
-  },
-  hintText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-  },
-});

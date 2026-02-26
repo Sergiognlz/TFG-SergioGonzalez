@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { useRanking } from '../viewModels/useRanking';
-import { Score } from '../../domain/entities/Score';
+import { useRanking } from '../../viewModels/useRanking';
+import { Score } from '../../../domain/entities/Score';
 import { styles } from './RankingView.styles';
 /**
  * Props de RankingView.

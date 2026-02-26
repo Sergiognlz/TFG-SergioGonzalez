@@ -2,13 +2,12 @@ import { StyleSheet } from 'react-native';
 
 /**
  * Estilos de RankingView.
- * Separados del componente siguiendo el principio de
- * Responsabilidad Única (SOLID - S).
+ * Estética cine años 80: neones, negro profundo y tipografía bold.
  */
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A3A5C',
+    backgroundColor: '#0A0A0F',
   },
   header: {
     flexDirection: 'row',
@@ -18,13 +17,17 @@ export const styles = StyleSheet.create({
     paddingTop: 48,
   },
   backButton: {
-    color: '#F9A825',
-    fontSize: 16,
+    color: '#00F5FF',
+    fontSize: 14,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
   },
   title: {
     color: '#FFFFFF',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
+    letterSpacing: 4,
+    textTransform: 'uppercase',
   },
   headerRight: {
     flexDirection: 'row',
@@ -32,32 +35,39 @@ export const styles = StyleSheet.create({
     gap: 8,
   },
   aliasText: {
-    color: '#F9A825',
-    fontSize: 14,
+    color: '#00F5FF',
+    fontSize: 13,
+    letterSpacing: 1,
   },
-  logoutLink: {
-    color: '#FF6B6B',
-    fontSize: 14,
-  },
+logoutLink: {
+  color: '#FF006E',
+  fontSize: 13,
+  letterSpacing: 1,
+  textTransform: 'uppercase',
+},
   refreshButton: {
-    color: '#F9A825',
+    color: '#FFE600',
     fontSize: 22,
   },
   tableHeader: {
     flexDirection: 'row',
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: '#1E3A5C',
+    paddingVertical: 10,
+    backgroundColor: '#0F0F1A',
     marginHorizontal: 16,
-    borderRadius: 8,
+    borderRadius: 4,
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#222233',
   },
   tableHeaderText: {
-    color: '#F9A825',
+    color: '#00F5FF',
     fontWeight: 'bold',
-    fontSize: 14,
+    fontSize: 12,
     width: 40,
     textAlign: 'center',
+    letterSpacing: 2,
+    textTransform: 'uppercase',
   },
   flex: {
     flex: 1,
@@ -69,33 +79,40 @@ export const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E3A5C',
+    borderBottomColor: '#0F0F1A',
   },
   topRow: {
-    backgroundColor: '#1E3A5C',
-    borderRadius: 8,
+    backgroundColor: '#0F0F1A',
+    borderRadius: 4,
     paddingHorizontal: 8,
     marginBottom: 4,
+    borderWidth: 1,
+    borderColor: '#222233',
   },
   position: {
     width: 40,
     textAlign: 'center',
-    color: '#AAAAAA',
+    color: '#888899',
     fontSize: 16,
   },
   alias: {
     flex: 1,
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 15,
+    letterSpacing: 1,
   },
   score: {
-    width: 60,
+    width: 70,
     textAlign: 'right',
-    color: '#F9A825',
+    color: '#FFE600',
     fontWeight: 'bold',
     fontSize: 16,
+    letterSpacing: 1,
+    textShadowColor: '#FFE600',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 6,
   },
   centered: {
     flex: 1,
@@ -104,25 +121,34 @@ export const styles = StyleSheet.create({
     padding: 24,
   },
   errorText: {
-    color: '#FF6B6B',
-    fontSize: 16,
+    color: '#FF006E',
+    fontSize: 15,
     textAlign: 'center',
     marginBottom: 16,
+    letterSpacing: 1,
   },
   retryButton: {
-    backgroundColor: '#F9A825',
-    borderRadius: 8,
+    backgroundColor: '#FF006E',
+    borderRadius: 4,
     paddingHorizontal: 24,
     paddingVertical: 12,
+    shadowColor: '#FF006E',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
+    elevation: 8,
   },
   retryText: {
-    color: '#1A3A5C',
+    color: '#FFFFFF',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 14,
+    letterSpacing: 3,
+    textTransform: 'uppercase',
   },
   emptyText: {
-    color: '#AAAAAA',
-    fontSize: 16,
+    color: '#888899',
+    fontSize: 15,
     textAlign: 'center',
+    letterSpacing: 2,
   },
 });

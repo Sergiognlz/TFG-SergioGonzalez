@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import { Game } from '../../domain/entities/Game';
+import { Game } from '../../../domain/entities/Game';
 import { styles } from './ResultView.styles';
 /**
  * Props de ResultView.

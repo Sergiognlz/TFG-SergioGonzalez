@@ -5,10 +5,10 @@ import {
   TouchableOpacity,
   Text,
   FlatList,
-  StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import { Movie } from '../../domain/entities/Movie';
+import { Movie } from '../../../domain/entities/Movie';
+import { styles } from './SearchInput.styles';
 
 /**
  * Props del componente SearchInput.
@@ -28,10 +28,11 @@ interface SearchInputProps {
 
 /**
  * Componente de búsqueda con autocompletado.
- * Muestra un campo de texto y una lista desplegable con sugerencias.
+ * Muestra un campo de texto y una lista desplegable flotante con sugerencias.
+ * El desplegable es absoluto para que no empuje el resto del layout.
  * Responsabilidad única (SOLID - S): solo se ocupa de capturar
  * la entrada del jugador y mostrar las sugerencias.
- * La lógica de búsqueda está en el hook useSearch (ViewModel).
+ * La lógica de búsqueda está en useSearch (ViewModel).
  */
 export function SearchInput({
   onSearch,
@@ -63,6 +64,7 @@ export function SearchInput({
 
   return (
     <View style={styles.container}>
+      {/* Campo de texto */}
       <View style={styles.inputRow}>
         <TextInput
           style={styles.input}
@@ -76,77 +78,33 @@ export function SearchInput({
           <ActivityIndicator
             style={styles.spinner}
             size="small"
-            color="#F9A825"
+            color="#FF006E"
           />
         )}
       </View>
 
+      {/* Desplegable flotante: no afecta al layout del resto de elementos */}
       {results.length > 0 && (
-        <FlatList
-          data={results}
-          keyExtractor={item => item.id.toString()}
-          style={styles.dropdown}
-          keyboardShouldPersistTaps="handled"
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.resultItem}
-              onPress={() => handleSelect(item)}
-            >
-              <Text style={styles.resultTitle}>{item.title}</Text>
-              {item.year > 0 && (
-                <Text style={styles.resultYear}>{item.year}</Text>
-              )}
-            </TouchableOpacity>
-          )}
-        />
+        <View style={styles.dropdownWrapper}>
+          <FlatList
+            data={results}
+            keyExtractor={item => item.id.toString()}
+            style={styles.dropdown}
+            keyboardShouldPersistTaps="handled"
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.resultItem}
+                onPress={() => handleSelect(item)}
+              >
+                <Text style={styles.resultTitle}>{item.title}</Text>
+                {item.year > 0 && (
+                  <Text style={styles.resultYear}>{item.year}</Text>
+                )}
+              </TouchableOpacity>
+            )}
+          />
+        </View>
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-  },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1E3A5C',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-  },
-  input: {
-    flex: 1,
-    height: 48,
-    color: '#FFFFFF',
-    fontSize: 16,
-  },
-  spinner: {
-    marginLeft: 8,
-  },
-  dropdown: {
-    backgroundColor: '#1E3A5C',
-    borderRadius: 8,
-    marginTop: 4,
-    maxHeight: 240,
-  },
-  resultItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#2A4A6C',
-  },
-  resultTitle: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    flex: 1,
-  },
-  resultYear: {
-    color: '#F9A825',
-    fontSize: 13,
-    marginLeft: 8,
-  },
-});
