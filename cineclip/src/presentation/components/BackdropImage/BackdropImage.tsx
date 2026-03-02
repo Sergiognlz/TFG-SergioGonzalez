@@ -35,7 +35,7 @@ export function BackdropImage({ url }: BackdropImageProps) {
       <Image
   source={{ uri: url }}
   style={styles.image}
-  resizeMode="cover"
+  resizeMode="contain"
   onLoad={() => setLoading(false)}
   onError={() => {
     setLoading(false);

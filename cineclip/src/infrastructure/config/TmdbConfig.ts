@@ -22,20 +22,3 @@ export const MIN_SEARCH_CHARS = 3;
  * seleccionar una película aleatoria por partida.
  * Se pueden ampliar en el futuro.
  */
-export const POPULAR_MOVIE_IDS = [
-  550,    // Fight Club
-  27205,  // Inception
-  157336, // Interstellar
-  11,     // Star Wars
-  120,    // El señor de los anillos
-  13,     // Forrest Gump
-  155,    // El caballero oscuro
-  680,    // Pulp Fiction
-  238,    // El padrino
-  424,    // La lista de Schindler
-  389,    // 12 Angry Men
-  278,    // Cadena perpetua
-  19404,  // Dilwale Dulhania Le Jayenge
-  372058, // Tu nombre
-  129,    // El viaje de Chihiro
-];

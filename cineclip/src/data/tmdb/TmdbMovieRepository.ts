@@ -1,7 +1,7 @@
 import { Movie } from '../../domain/entities/Movie';
 import { IMovieRepository } from '../../domain/interfaces/repositories/IMovieRepository';
 import { tmdbGet, TMDB_IMAGE_BASE_URL } from '../../infrastructure/http/tmdbClient';
-import { POPULAR_MOVIE_IDS, MAX_BACKDROPS } from '../../infrastructure/config/tmdbConfig';
+import { MAX_BACKDROPS } from '../../infrastructure/config/tmdbConfig';
 
 /**
  * Tipos auxiliares que representan la estructura raw de la respuesta de TMDB.
@@ -24,31 +24,76 @@ interface TmdbImagesResponse {
   backdrops: { file_path: string; vote_average: number }[];
 }
 
+interface TmdbDiscoverResponse {
+  results: { id: number }[];
+  total_pages: number;
+}
+
 /**
  * Implementación concreta de MovieRepository que obtiene datos de la API de TMDB.
  * Siguiendo el principio de Inversión de Dependencias (SOLID - D),
  * la lógica de negocio nunca importa esta clase directamente,
- * sino la interfaz MovieRepository.
+ * sino la interfaz IMovieRepository.
  */
 export class TmdbMovieRepository implements IMovieRepository {
 
   /**
-   * Obtiene una película aleatoria de la lista de populares con todos sus datos.
-   * Lanza en paralelo las tres peticiones necesarias a TMDB para minimizar el tiempo de carga.
+   * Obtiene una película aleatoria de TMDB usando el endpoint /discover/movie.
+   * Filtra por popularidad mínima y backdrops disponibles para garantizar
+   * que las películas sean conocidas y jugables.
    * @returns Promise con la entidad Movie completa lista para jugar.
    */
   async getRandomMovie(): Promise<Movie> {
-    // Elegir un ID aleatorio de la lista de películas populares
-    const randomId = POPULAR_MOVIE_IDS[
-      Math.floor(Math.random() * POPULAR_MOVIE_IDS.length)
-    ];
+    let movie: Movie | null = null;
 
-    // Lanzar las tres peticiones en paralelo
+    // Reintentar hasta encontrar una película con suficientes backdrops
+    while (!movie) {
+      movie = await this.tryGetRandomMovie();
+    }
+
+    return movie;
+  }
+
+  /**
+   * Intenta obtener una película aleatoria válida.
+   * Devuelve null si la película no tiene suficientes backdrops para jugar.
+   */
+  private async tryGetRandomMovie(): Promise<Movie | null> {
+    // Primera llamada para obtener el total de páginas disponibles
+    const firstPage = await tmdbGet<TmdbDiscoverResponse>('/discover/movie', {
+  sort_by: 'popularity.desc',
+  'vote_count.gte': '500',
+  'vote_average.gte': '5',
+  with_original_language: 'en',
+  page: '1',
+});
+
+const maxPages = Math.min(firstPage.total_pages, 100);
+const randomPage = Math.floor(Math.random() * maxPages) + 1;
+
+const page = await tmdbGet<TmdbDiscoverResponse>('/discover/movie', {
+  sort_by: 'popularity.desc',
+  'vote_count.gte': '500',
+  'vote_average.gte': '5',
+  with_original_language: 'en',
+  page: randomPage.toString(),
+});
+    if (!page.results.length) return null;
+
+    // Elegir una película aleatoria de la página
+    const randomMovie = page.results[Math.floor(Math.random() * page.results.length)];
+
+    // Obtener los detalles completos en paralelo
     const [details, credits, images] = await Promise.all([
-      tmdbGet<TmdbMovieResponse>(`/movie/${randomId}`),
-      tmdbGet<TmdbCreditsResponse>(`/movie/${randomId}/credits`),
-      tmdbGet<TmdbImagesResponse>(`/movie/${randomId}/images`, { include_image_language: 'null' }),
+      tmdbGet<TmdbMovieResponse>(`/movie/${randomMovie.id}`),
+      tmdbGet<TmdbCreditsResponse>(`/movie/${randomMovie.id}/credits`),
+      tmdbGet<TmdbImagesResponse>(`/movie/${randomMovie.id}/images`, {
+        include_image_language: 'null',
+      }),
     ]);
+
+    // Descartar si no tiene suficientes backdrops para jugar
+    if (images.backdrops.length < 3) return null;
 
     return this.mapToMovie(details, credits, images);
   }
@@ -56,7 +101,7 @@ export class TmdbMovieRepository implements IMovieRepository {
   /**
    * Busca películas por título para el autocompletado.
    * @param query Texto introducido por el jugador (mínimo 3 caracteres).
-   * @returns Promise con lista simplificada de películas para mostrar en el desplegable.
+   * @returns Promise con lista simplificada de películas para el desplegable.
    */
   async searchMovies(query: string): Promise<Movie[]> {
     const response = await tmdbGet<{ results: TmdbMovieResponse[] }>(
@@ -64,7 +109,6 @@ export class TmdbMovieRepository implements IMovieRepository {
       { query },
     );
 
-    // Mapear solo los campos necesarios para el autocompletado
     return response.results.slice(0, 8).map(movie => ({
       id: movie.id,
       title: movie.title,
