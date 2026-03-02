@@ -58,7 +58,7 @@ export function GameView({
     onGameStateChange,
   );
   const { results, searching, search, clearResults } = useSearch();
-  const { height } = useWindowDimensions();
+  const { height, width } = useWindowDimensions();
 
   /** Solo iniciar partida si no hay ninguna activa. */
   useEffect(() => {
@@ -74,12 +74,15 @@ export function GameView({
     }
   }, [game?.result]);
 
-  /** Log temporal para verificar valores que llegan al ScoreCard. */
-  console.log('GameView - sessionScore:', sessionScore, 'attemptsLeft:', game?.attemptsLeft);
-
   /** URL del backdrop activo según el índice actual. */
   const currentBackdropUrl = game?.movie.backdrops[game.currentBackdropIndex]
     ?? game?.movie.backdrops[0];
+
+  /** Ancho disponible menos el padding del contenedor (16*2). */
+  const imageWidth = width - 32;
+
+  /** Altura calculada con ratio 16:9 exacto, limitada al 50% de la pantalla. */
+ const backdropHeight = Math.min(imageWidth * (9 / 16), height * 0.65);
 
   /**
    * Contenido principal calculado antes del return.
@@ -117,8 +120,8 @@ export function GameView({
         </View>
       </View>
 
-      {/* Backdrop con pistas flotantes encima */}
-      <View style={[styles.backdropContainer, { height: height * 0.65 }]}>
+      {/* Backdrop con ratio 16:9 exacto y pistas flotantes encima */}
+      <View style={[styles.backdropContainer, { height: backdropHeight, width: imageWidth }]}>
         <BackdropImage url={currentBackdropUrl ?? ''} />
         {game.hintsRevealed.length > 0 && (
           <View style={styles.hintsOverlay}>
@@ -129,31 +132,29 @@ export function GameView({
         )}
       </View>
 
-      {/* Estado de la partida */}
-      <ScoreCard
-        score={sessionScore}
-        attemptsLeft={game.attemptsLeft}
-      />
-
-      {/* Campo de búsqueda con autocompletado */}
-      <SearchInput
-        onSearch={search}
-        results={results}
-        searching={searching}
-        onSelect={movie => {
-          clearResults();
-          handleAnswer(movie.id);
-        }}
-        onClear={clearResults}
-      />
-
-      {/* Botón para saltar */}
-      <TouchableOpacity
-        style={styles.skipButton}
-        onPress={() => handleAnswer(-1)}
-      >
-        <Text style={styles.skipText}>Pasar →</Text>
-      </TouchableOpacity>
+      {/* Elementos inferiores fijos */}
+      <View style={styles.bottomContainer}>
+        <ScoreCard
+          score={sessionScore}
+          attemptsLeft={game.attemptsLeft}
+        />
+        <SearchInput
+          onSearch={search}
+          results={results}
+          searching={searching}
+          onSelect={movie => {
+            clearResults();
+            handleAnswer(movie.id);
+          }}
+          onClear={clearResults}
+        />
+        <TouchableOpacity
+          style={styles.skipButton}
+          onPress={() => handleAnswer(-1)}
+        >
+          <Text style={styles.skipText}>Pasar →</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 

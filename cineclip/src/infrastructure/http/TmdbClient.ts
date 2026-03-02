@@ -10,7 +10,7 @@
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
 /** URL base para construir las URLs completas de los backdrops. */
-export const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w1280';
+export const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/original';
 
 /** Idioma de todas las peticiones. Devuelve títulos y metadatos en español. */
 const LANGUAGE = 'es-ES';

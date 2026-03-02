@@ -142,10 +142,10 @@ const page = await tmdbGet<TmdbDiscoverResponse>('/discover/movie', {
 
     // Ordenar backdrops por vote_average ascendente (más ambiguos primero)
     // y construir las URLs completas
-    const backdrops = images.backdrops
-      .sort((a, b) => a.vote_average - b.vote_average)
-      .slice(0, MAX_BACKDROPS)
-      .map(b => `${TMDB_IMAGE_BASE_URL}${b.file_path}`);
+const backdrops = images.backdrops
+  .sort((a, b) => a.vote_average - b.vote_average)
+  .slice(0, MAX_BACKDROPS)
+  .map(b => `${TMDB_IMAGE_BASE_URL}${b.file_path}`);
 
     return {
       id: details.id,

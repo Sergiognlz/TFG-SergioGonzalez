@@ -1,15 +1,11 @@
 import { StyleSheet } from 'react-native';
 
-/**
- * Estilos de ScoreCard.
- * Estética cine años 80: neones, negro profundo y tipografía bold.
- */
 export const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     backgroundColor: '#0F0F1A',
     borderRadius: 4,
-    paddingVertical: 4,
+    paddingVertical: 8,
     paddingHorizontal: 12,
     justifyContent: 'space-around',
     alignItems: 'center',
@@ -21,21 +17,25 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   label: {
-    color: '#888899',
-    fontSize: 9,
-    marginBottom: 1,
-    letterSpacing: 2,
+    color: '#FFE600',
+    fontSize: 10,
+    marginBottom: 2,
+    letterSpacing: 4,
     textTransform: 'uppercase',
+    fontWeight: 'bold',
   },
   value: {
     color: '#FFE600',
-    fontSize: 16,
+    fontSize: 32,
     fontWeight: 'bold',
-    letterSpacing: 2,
+    letterSpacing: 4,
+    fontFamily: 'monospace',
+    // @ts-ignore - propiedad web válida
+    textShadow: '0 0 8px #FFE600, 0 0 16px #FFE600, 0 0 32px #FFB800',
   },
   divider: {
     width: 1,
-    height: 28,
+    height: 40,
     backgroundColor: '#222233',
   },
 });

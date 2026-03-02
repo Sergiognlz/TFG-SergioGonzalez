@@ -12,16 +12,13 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
   },
-  title: {
-    fontSize: 64,
-    fontWeight: 'bold',
-    color: '#FF006E',
-    letterSpacing: 8,
-    textShadowColor: '#FF006E',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 20,
-    marginBottom: 8,
-  },
+ title: {
+  fontSize: 80,
+  color: '#FF006E',
+  letterSpacing: 8,
+  fontFamily: 'BebasNeue_400Regular',
+  marginBottom: 8,
+},
   subtitle: {
     fontSize: 14,
     color: '#00F5FF',

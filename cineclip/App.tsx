@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, ActivityIndicator } from 'react-native';
+import { useFonts, BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
 import { AliasView } from './src/presentation/views/aliasView/AliasView';
 import { GameView } from './src/presentation/views/gameView/GameView';
 import { ResultView } from './src/presentation/views/resultView/ResultView';
@@ -44,6 +45,11 @@ export default function App() {
 
   /** Indica si la app está inicializando. */
   const [initializing, setInitializing] = useState(true);
+
+  /** Carga de la fuente Bebas Neue para el título estilo Hollywood. */
+  const [fontsLoaded] = useFonts({
+    BebasNeue_400Regular,
+  });
 
   /**
    * Al arrancar comprueba si hay un alias guardado en AsyncStorage.
@@ -115,7 +121,8 @@ export default function App() {
     setScreen('alias');
   };
 
-  if (initializing) {
+  /** Mostrar spinner mientras se inicializa o cargan las fuentes. */
+  if (initializing || !fontsLoaded) {
     return (
       <View style={{ flex: 1, backgroundColor: '#0A0A0F', alignItems: 'center', justifyContent: 'center' }}>
         <ActivityIndicator size="large" color="#FF006E" />
