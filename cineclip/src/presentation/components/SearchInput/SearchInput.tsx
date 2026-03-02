@@ -91,17 +91,23 @@ export function SearchInput({
             keyExtractor={item => item.id.toString()}
             style={styles.dropdown}
             keyboardShouldPersistTaps="handled"
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.resultItem}
-                onPress={() => handleSelect(item)}
-              >
-                <Text style={styles.resultTitle}>{item.title}</Text>
-                {item.year > 0 && (
-                  <Text style={styles.resultYear}>{item.year}</Text>
-                )}
-              </TouchableOpacity>
-            )}
+           renderItem={({ item }) => {
+  /** Comprobar si hay más de una película con el mismo título. */
+  const duplicates = results.filter(
+    r => r.title.toLowerCase() === item.title.toLowerCase()
+  ).length > 1;
+
+  return (
+    <TouchableOpacity
+      style={styles.resultItem}
+      onPress={() => handleSelect(item)}
+    >
+      <Text style={styles.resultTitle}>
+        {item.title}{duplicates && item.year > 0 ? ` (${item.year})` : ''}
+      </Text>
+    </TouchableOpacity>
+  );
+}}
           />
         </View>
       )}

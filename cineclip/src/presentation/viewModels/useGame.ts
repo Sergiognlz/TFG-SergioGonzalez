@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Game } from '../../domain/entities/Game';
 import { Movie } from '../../domain/entities/Movie';
 import { startGame, submitAnswer, saveSessionScore } from '../../di/container';
@@ -7,7 +7,7 @@ import { startGame, submitAnswer, saveSessionScore } from '../../di/container';
  * Hook principal de la aplicación. Actúa como ViewModel de GameView.
  * Gestiona la mecánica de racha: el jugador acumula puntuación
  * mientras acierta películas. Un fallo termina la sesión.
- * 
+ *
  * El estado de la partida y la puntuación se reciben desde fuera
  * para que sobrevivan a los cambios de pantalla (ranking, etc.).
  */
@@ -23,6 +23,9 @@ export function useGame(
   /** Puntuación acumulada en la sesión actual. */
   const [sessionScore, setSessionScore] = useState(initialSessionScore);
 
+  /** Ref para tener siempre el sessionScore más reciente en los callbacks. */
+  const sessionScoreRef = useRef(initialSessionScore);
+
   /** Indica si se está cargando una nueva película. */
   const [loading, setLoading] = useState(false);
 
@@ -35,12 +38,13 @@ export function useGame(
   const updateState = useCallback((newGame: Game | null, newScore: number) => {
     setGame(newGame);
     setSessionScore(newScore);
+    sessionScoreRef.current = newScore;
     onGameStateChange(newGame, newScore);
   }, [onGameStateChange]);
 
   /**
    * Carga una nueva película y construye el estado inicial del juego.
-   * Solo se llama si no hay partida activa o al iniciar una nueva sesión.
+   * Usa sessionScoreRef para tener siempre el valor más reciente.
    */
   const initGame = useCallback(async () => {
     setLoading(true);
@@ -56,17 +60,17 @@ export function useGame(
         result: 'playing',
         score: 0,
       };
-      updateState(newGame, sessionScore);
+      updateState(newGame, sessionScoreRef.current);
     } catch (e) {
       setError('No se pudo cargar la película. Comprueba tu conexión.');
     } finally {
       setLoading(false);
     }
-  }, [sessionScore, updateState]);
+  }, [updateState]);
 
   /**
    * Procesa la respuesta del jugador.
-   * - Acierto: acumula puntuación y carga nueva película.
+   * - Acierto: acumula puntuación en el ref y carga nueva película.
    * - Fallo con intentos: muestra nuevo backdrop y pista.
    * - Game over: guarda puntuación total en el ranking.
    */
@@ -88,18 +92,22 @@ export function useGame(
       );
 
       if (result.isCorrect) {
-        const newSessionScore = sessionScore + result.score;
+        // Acumular puntuación usando el ref para evitar closures obsoletos
+        const newSessionScore = sessionScoreRef.current + result.score;
+        sessionScoreRef.current = newSessionScore;
         setSessionScore(newSessionScore);
         onGameStateChange(null, newSessionScore);
         await initGame();
 
       } else if (result.gameResult === 'loss') {
-        const finalScore = sessionScore;
+        // Game over: guardar puntuación total en el ranking
+        const finalScore = sessionScoreRef.current;
         await saveSessionScore.execute(alias, finalScore);
         const lostGame = { ...game, result: 'loss' as const, score: finalScore };
         updateState(lostGame, finalScore);
 
       } else {
+        // Fallo con intentos restantes: actualizar backdrop y pistas
         const nextBackdropIndex = Math.min(
           game.currentBackdropIndex + 1,
           game.movie.backdrops.length - 1,
@@ -114,12 +122,12 @@ export function useGame(
           currentBackdropIndex: nextBackdropIndex,
           hintsRevealed: newHints,
         };
-        updateState(updatedGame, sessionScore);
+        updateState(updatedGame, sessionScoreRef.current);
       }
     } catch (e) {
       setError('Error al procesar la respuesta. Inténtalo de nuevo.');
     }
-  }, [game, alias, sessionScore, initGame, updateState, onGameStateChange]);
+  }, [game, alias, initGame, updateState, onGameStateChange]);
 
   return {
     game,
