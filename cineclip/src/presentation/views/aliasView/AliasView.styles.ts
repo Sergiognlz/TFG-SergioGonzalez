@@ -114,4 +114,15 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     letterSpacing: 1,
   },
+ signatureText: {
+  fontSize: 13,
+  fontWeight: '100', // El nivel más bajo de grosor
+  color: '#FFFFFF',
+  textShadowColor: 'rgba(255, 255, 255, 0.3)', 
+  textShadowOffset: { width: 0, height: 0 },
+  textShadowRadius: 4, // Un aura tenue, no un brillo neón
+  letterSpacing: 4,
+  marginTop: 30,    // Empuja el nombre hacia abajo, alejándolo de lo que esté arriba
+  marginBottom: 20, // Separa el nombre del borde inferior de la pantalla
+},
 });

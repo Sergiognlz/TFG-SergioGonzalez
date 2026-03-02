@@ -155,6 +155,10 @@ export function AliasView({ onRegistered }: AliasViewProps) {
               ? '¿No tienes cuenta? Regístrate'
               : '¿Ya tienes cuenta? Inicia sesión'}
           </Text>
+          <Text style={styles.signatureText}>
+  'By Sergio González'
+</Text>
+       
         </TouchableOpacity>
 
       </View>
