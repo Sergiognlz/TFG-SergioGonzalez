@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, ActivityIndicator } from 'react-native';
 import { useFonts, BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { AliasView } from './src/presentation/views/aliasView/AliasView';
 import { GameView } from './src/presentation/views/gameView/GameView';
 import { ResultView } from './src/presentation/views/resultView/ResultView';
@@ -131,43 +132,47 @@ export default function App() {
   }
 
   return (
-    <>
-      {screen === 'alias' && (
-        <AliasView onRegistered={handleRegistered} />
-      )}
-      {screen === 'game' && (
-        <GameView
-          alias={alias}
-          initialGame={activeGame}
-          initialSessionScore={sessionScore}
-          onGameStateChange={handleGameStateChange}
-          onGameOver={handleGameOver}
-          onLogout={handleLogout}
-          onGoToRanking={() => {
-            setPreviousScreen('game');
-            setScreen('ranking');
-          }}
-        />
-      )}
-      {screen === 'result' && lastGame && (
-        <ResultView
-          game={lastGame}
-          alias={alias}
-          onNewGame={handleNewGame}
-          onLogout={handleLogout}
-          onGoToRanking={() => {
-            setPreviousScreen('result');
-            setScreen('ranking');
-          }}
-        />
-      )}
-      {screen === 'ranking' && (
-        <RankingView
-          alias={alias}
-          onBack={() => setScreen(previousScreen)}
-          onLogout={handleLogout}
-        />
-      )}
-    </>
+    /** SafeAreaProvider necesario para que SafeAreaView funcione correctamente. */
+    <SafeAreaProvider>
+      {/** SafeAreaView respeta la barra de navegación de Android y el notch de iOS. */}
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#0A0A0F' }}>
+        {screen === 'alias' && (
+          <AliasView onRegistered={handleRegistered} />
+        )}
+        {screen === 'game' && (
+          <GameView
+            alias={alias}
+            initialGame={activeGame}
+            initialSessionScore={sessionScore}
+            onGameStateChange={handleGameStateChange}
+            onGameOver={handleGameOver}
+            onLogout={handleLogout}
+            onGoToRanking={() => {
+              setPreviousScreen('game');
+              setScreen('ranking');
+            }}
+          />
+        )}
+        {screen === 'result' && lastGame && (
+          <ResultView
+            game={lastGame}
+            alias={alias}
+            onNewGame={handleNewGame}
+            onLogout={handleLogout}
+            onGoToRanking={() => {
+              setPreviousScreen('result');
+              setScreen('ranking');
+            }}
+          />
+        )}
+        {screen === 'ranking' && (
+          <RankingView
+            alias={alias}
+            onBack={() => setScreen(previousScreen)}
+            onLogout={handleLogout}
+          />
+        )}
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }

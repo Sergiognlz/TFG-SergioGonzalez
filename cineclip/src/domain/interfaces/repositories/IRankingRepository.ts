@@ -9,11 +9,7 @@ import { Score } from '../../entities/Score';
  * solo hay que crear una nueva implementación de esta interfaz.
  */
 export interface IRankingRepository {
-  /**
-   * Guarda o actualiza los datos de un jugador en la base de datos.
-   * Si el alias no existe lo crea, si existe lo actualiza.
-   * @param player Entidad Player con los datos actualizados.
-   */
+  /** Guarda o actualiza los datos de un jugador en la base de datos. */
   savePlayer(player: Player): Promise<void>;
 
   /**
@@ -24,18 +20,9 @@ export interface IRankingRepository {
    */
   updateScore(alias: string, score: number): Promise<void>;
 
-  /**
-   * Obtiene el ranking global ordenado por puntuación descendente.
-   * @param limit Número máximo de entradas a devolver. Por defecto 10.
-   * @returns Promise con la lista de puntuaciones ordenada.
-   */
+  /** Obtiene el ranking global ordenado por puntuación descendente. */
   getRanking(limit?: number): Promise<Score[]>;
 
-  /**
-   * Comprueba si un alias ya existe en la base de datos.
-   * Se usa al registrar un nuevo jugador para evitar duplicados.
-   * @param alias Alias a comprobar.
-   * @returns Promise con true si el alias ya está registrado.
-   */
+  /** Comprueba si un alias ya existe en la base de datos. */
   aliasExists(alias: string): Promise<boolean>;
 }

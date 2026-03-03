@@ -92,7 +92,7 @@ export function useGame(
       );
 
       if (result.isCorrect) {
-        // Acumular puntuación usando el ref para evitar closures obsoletos
+        /** Acumular puntuación usando el ref para evitar closures obsoletos. */
         const newSessionScore = sessionScoreRef.current + result.score;
         sessionScoreRef.current = newSessionScore;
         setSessionScore(newSessionScore);
@@ -100,14 +100,14 @@ export function useGame(
         await initGame();
 
       } else if (result.gameResult === 'loss') {
-        // Game over: guardar puntuación total en el ranking
+        /** Game over: guardar puntuación total en el ranking. */
         const finalScore = sessionScoreRef.current;
         await saveSessionScore.execute(alias, finalScore);
         const lostGame = { ...game, result: 'loss' as const, score: finalScore };
         updateState(lostGame, finalScore);
 
       } else {
-        // Fallo con intentos restantes: actualizar backdrop y pistas
+        /** Fallo con intentos restantes: actualizar backdrop y pistas. */
         const nextBackdropIndex = Math.min(
           game.currentBackdropIndex + 1,
           game.movie.backdrops.length - 1,

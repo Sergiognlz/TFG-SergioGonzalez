@@ -19,7 +19,7 @@ import { IRankingRepository } from '../../domain/interfaces/repositories/IRankin
  * Siguiendo el principio de Inversión de Dependencias (SOLID - D),
  * la lógica de negocio nunca importa esta clase directamente,
  * sino la interfaz RankingRepository.
- * 
+ *
  * Colecciones de Firestore utilizadas:
  * - /jugadores/{alias} → datos del jugador
  * - /ranking/{alias}   → puntuación máxima para el ranking global
@@ -53,14 +53,14 @@ export class FirebaseRankingRepository implements IRankingRepository {
     const snapshot = await getDoc(rankingRef);
 
     if (!snapshot.exists()) {
-      // Primera puntuación del jugador: crear el documento
+      /** Primera puntuación del jugador: crear el documento. */
       await setDoc(rankingRef, {
         alias_jugador: alias,
         puntuacion_maxima: score,
         fecha_actualizacion: new Date(),
       });
     } else {
-      // Solo actualizar si la nueva puntuación supera la anterior
+      /** Solo actualizar si la nueva puntuación supera la anterior. */
       const current = snapshot.data().puntuacion_maxima ?? 0;
       if (score > current) {
         await updateDoc(rankingRef, {
@@ -73,7 +73,7 @@ export class FirebaseRankingRepository implements IRankingRepository {
 
   /**
    * Obtiene el ranking global ordenado por puntuación descendente.
-   * @param limit Número máximo de entradas a devolver. Por defecto 10.
+   * @param limitCount Número máximo de entradas a devolver. Por defecto 10.
    * @returns Promise con la lista de puntuaciones ordenada.
    */
   async getRanking(limitCount: number = 10): Promise<Score[]> {
@@ -83,9 +83,7 @@ export class FirebaseRankingRepository implements IRankingRepository {
       orderBy('puntuacion_maxima', 'desc'),
       limit(limitCount),
     );
-
     const snapshot = await getDocs(q);
-
     return snapshot.docs.map(doc => ({
       alias: doc.data().alias_jugador,
       maxScore: doc.data().puntuacion_maxima,

@@ -91,6 +91,18 @@ export function GameView({
   const hintsFontSize = isLandscape ? 9 : width < 768 ? 10 : 15;
 
   /**
+   * Tamaño del título según plataforma y orientación.
+   * En móvil más pequeño para que quepan los links del header.
+   */
+  const titleFontSize = Platform.OS === 'web' ? 48 : isLandscape ? 20 : 28;
+
+  /**
+   * Tamaño de los links del header según plataforma y orientación.
+   * En móvil más pequeño para que quepan en una línea.
+   */
+  const headerLinkFontSize = Platform.OS === 'web' ? 20 : isLandscape ? 10 : 13;
+
+  /**
    * En móvil el backdrop tiene altura fija proporcional a la pantalla
    * para que quepan header y bottomContainer sin espacio negro.
    * En web usa flex:1 para ocupar todo el espacio sobrante disponible.
@@ -99,7 +111,8 @@ export function GameView({
     ? styles.backdropContainer
     : [styles.backdropContainer, {
         flex: 0,
-        height: isLandscape ? height * 0.50 : height * 0.42,
+        height: isLandscape ? height * 0.45 : height * 0.35,
+        width: width - 32,
       }];
 
   /**
@@ -126,14 +139,14 @@ export function GameView({
     <View style={[styles.container, Platform.OS !== 'web' && { justifyContent: 'space-between' }]}>
       {/* Título, usuario y botones de navegación */}
       <View style={[styles.header, isLandscape && { marginBottom: 2 }]}>
-        <Text style={[styles.title, isLandscape && { fontSize: 20 }]}>CineClip</Text>
+        <Text style={[styles.title, { fontSize: titleFontSize }]}>CineClip</Text>
         <View style={styles.headerRight}>
-          <Text style={[styles.aliasText, isLandscape && { fontSize: 10 }]}>👤 {alias}</Text>
+          <Text style={[styles.aliasText, { fontSize: headerLinkFontSize }]}>👤 {alias}</Text>
           <TouchableOpacity onPress={onGoToRanking}>
-            <Text style={[styles.rankingLink, isLandscape && { fontSize: 10 }]}>Ranking</Text>
+            <Text style={[styles.rankingLink, { fontSize: headerLinkFontSize }]}>Ranking</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={onLogout}>
-            <Text style={[styles.logoutLink, isLandscape && { fontSize: 10 }]}>Salir</Text>
+            <Text style={[styles.logoutLink, { fontSize: headerLinkFontSize }]}>Salir</Text>
           </TouchableOpacity>
         </View>
       </View>
