@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Movie } from '../../domain/entities/Movie';
-import { tmdbGet } from '../../infrastructure/http/tmdbClient';
-import { MIN_SEARCH_CHARS } from '../../infrastructure/config/tmdbConfig';
+import { tmdbGet } from '../../infrastructure/http/TmdbClient';
+import { MIN_SEARCH_CHARS } from '../../infrastructure/config/TmdbConfig';
 
 /**
  * Hook que gestiona el autocompletado del campo de búsqueda.

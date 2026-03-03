@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   useWindowDimensions,
+  Platform,
 } from 'react-native';
 import { useGame } from '../../viewModels/useGame';
 import { useSearch } from '../../viewModels/useSearch';
@@ -78,11 +79,28 @@ export function GameView({
   const currentBackdropUrl = game?.movie.backdrops[game.currentBackdropIndex]
     ?? game?.movie.backdrops[0];
 
-  /** Ancho disponible menos el padding del contenedor (16*2). */
-  const imageWidth = width - 32;
+  /**
+   * Detectar modo horizontal solo en móvil.
+   * En web siempre es false porque el ancho siempre supera al alto
+   * y causaría que los estilos compactos se aplicaran siempre.
+   */
+  const isLandscape = Platform.OS !== 'web' && width > height;
 
-  /** Altura calculada con ratio 16:9 exacto, limitada al 50% de la pantalla. */
- const backdropHeight = Math.min(imageWidth * (9 / 16), height * 0.65);
+  /** En pantallas pequeñas o landscape el overlay de pistas ocupa menos espacio. */
+  const hintsMaxWidth = isLandscape ? 150 : width < 768 ? 160 : 320;
+  const hintsFontSize = isLandscape ? 9 : width < 768 ? 10 : 15;
+
+  /**
+   * En móvil el backdrop tiene altura fija proporcional a la pantalla
+   * para que quepan header y bottomContainer sin espacio negro.
+   * En web usa flex:1 para ocupar todo el espacio sobrante disponible.
+   */
+  const backdropStyle = Platform.OS === 'web'
+    ? styles.backdropContainer
+    : [styles.backdropContainer, {
+        flex: 0,
+        height: isLandscape ? height * 0.50 : height * 0.42,
+      }];
 
   /**
    * Contenido principal calculado antes del return.
@@ -105,38 +123,41 @@ export function GameView({
       <ActivityIndicator size="large" color="#FF006E" />
     </View>
   ) : (
-    <View style={styles.container}>
+    <View style={[styles.container, Platform.OS !== 'web' && { justifyContent: 'space-between' }]}>
       {/* Título, usuario y botones de navegación */}
-      <View style={styles.header}>
-        <Text style={styles.title}>CineClip</Text>
+      <View style={[styles.header, isLandscape && { marginBottom: 2 }]}>
+        <Text style={[styles.title, isLandscape && { fontSize: 20 }]}>CineClip</Text>
         <View style={styles.headerRight}>
-          <Text style={styles.aliasText}>👤 {alias}</Text>
+          <Text style={[styles.aliasText, isLandscape && { fontSize: 10 }]}>👤 {alias}</Text>
           <TouchableOpacity onPress={onGoToRanking}>
-            <Text style={styles.rankingLink}>Ranking</Text>
+            <Text style={[styles.rankingLink, isLandscape && { fontSize: 10 }]}>Ranking</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={onLogout}>
-            <Text style={styles.logoutLink}>Salir</Text>
+            <Text style={[styles.logoutLink, isLandscape && { fontSize: 10 }]}>Salir</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Backdrop con ratio 16:9 exacto y pistas flotantes encima */}
-      <View style={[styles.backdropContainer, { height: backdropHeight, width: imageWidth }]}>
+      {/* Backdrop adaptado según plataforma y orientación */}
+      <View style={backdropStyle}>
         <BackdropImage url={currentBackdropUrl ?? ''} />
         {game.hintsRevealed.length > 0 && (
-          <View style={styles.hintsOverlay}>
+          <View style={[styles.hintsOverlay, { maxWidth: hintsMaxWidth }]}>
             {game.hintsRevealed.map((hint, index) => (
-              <Text key={index} style={styles.hintOverlayText}>• {hint}</Text>
+              <Text key={index} style={[styles.hintOverlayText, { fontSize: hintsFontSize }]}>
+                • {hint}
+              </Text>
             ))}
           </View>
         )}
       </View>
 
-      {/* Elementos inferiores fijos */}
-      <View style={styles.bottomContainer}>
+      {/* Elementos inferiores: ScoreCard, SearchInput y botón Pasar */}
+      <View style={[styles.bottomContainer, isLandscape && { gap: 4, paddingBottom: 8 }]}>
         <ScoreCard
           score={sessionScore}
           attemptsLeft={game.attemptsLeft}
+          compact={isLandscape}
         />
         <SearchInput
           onSearch={search}

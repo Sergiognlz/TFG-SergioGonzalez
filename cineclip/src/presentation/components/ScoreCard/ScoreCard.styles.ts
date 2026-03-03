@@ -16,22 +16,22 @@ export const styles = StyleSheet.create({
   item: {
     alignItems: 'center',
   },
-label: {
-  color: '#FFE600',
-  fontSize: 9,
-  marginBottom: 1,
-  letterSpacing: 3,
-  textTransform: 'uppercase',
-  fontWeight: 'bold',
-},
 value: {
   color: '#FFE600',
-  fontSize: 22,
+  fontSize: 28,
   fontWeight: 'bold',
   letterSpacing: 4,
   fontFamily: 'monospace',
   // @ts-ignore
   textShadow: '0 0 8px #FFE600, 0 0 16px #FFE600, 0 0 32px #FFB800',
+},
+label: {
+  color: '#FFE600',
+  fontSize: 11,
+  marginBottom: 2,
+  letterSpacing: 4,
+  textTransform: 'uppercase',
+  fontWeight: 'bold',
 },
 divider: {
   width: 1,

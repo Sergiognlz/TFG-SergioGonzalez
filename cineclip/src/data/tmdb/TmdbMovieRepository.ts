@@ -1,7 +1,7 @@
 import { Movie } from '../../domain/entities/Movie';
 import { IMovieRepository } from '../../domain/interfaces/repositories/IMovieRepository';
-import { tmdbGet, TMDB_IMAGE_BASE_URL } from '../../infrastructure/http/tmdbClient';
-import { MAX_BACKDROPS } from '../../infrastructure/config/tmdbConfig';
+import { tmdbGet, TMDB_IMAGE_BASE_URL } from '../../infrastructure/http/TmdbClient';
+import { MAX_BACKDROPS } from '../../infrastructure/config/TmdbConfig';
 
 /**
  * Tipos auxiliares que representan la estructura raw de la respuesta de TMDB.
@@ -21,7 +21,12 @@ interface TmdbCreditsResponse {
 }
 
 interface TmdbImagesResponse {
-  backdrops: { file_path: string; vote_average: number }[];
+  backdrops: {
+    file_path: string;
+    vote_average: number;
+    width: number;
+    height: number;
+  }[];
 }
 
 interface TmdbDiscoverResponse {
@@ -61,23 +66,24 @@ export class TmdbMovieRepository implements IMovieRepository {
   private async tryGetRandomMovie(): Promise<Movie | null> {
     // Primera llamada para obtener el total de páginas disponibles
     const firstPage = await tmdbGet<TmdbDiscoverResponse>('/discover/movie', {
-  sort_by: 'popularity.desc',
-  'vote_count.gte': '500',
-  'vote_average.gte': '5',
-  with_original_language: 'en',
-  page: '1',
-});
+      sort_by: 'popularity.desc',
+      'vote_count.gte': '500',
+      'vote_average.gte': '5',
+      with_original_language: 'en',
+      page: '1',
+    });
 
-const maxPages = Math.min(firstPage.total_pages, 100);
-const randomPage = Math.floor(Math.random() * maxPages) + 1;
+    const maxPages = Math.min(firstPage.total_pages, 100);
+    const randomPage = Math.floor(Math.random() * maxPages) + 1;
 
-const page = await tmdbGet<TmdbDiscoverResponse>('/discover/movie', {
-  sort_by: 'popularity.desc',
-  'vote_count.gte': '500',
-  'vote_average.gte': '5',
-  with_original_language: 'en',
-  page: randomPage.toString(),
-});
+    const page = await tmdbGet<TmdbDiscoverResponse>('/discover/movie', {
+      sort_by: 'popularity.desc',
+      'vote_count.gte': '500',
+      'vote_average.gte': '5',
+      with_original_language: 'en',
+      page: randomPage.toString(),
+    });
+
     if (!page.results.length) return null;
 
     // Elegir una película aleatoria de la página
@@ -92,10 +98,16 @@ const page = await tmdbGet<TmdbDiscoverResponse>('/discover/movie', {
       }),
     ]);
 
-    // Descartar si no tiene suficientes backdrops para jugar
-    if (images.backdrops.length < 3) return null;
+    // Filtrar solo imágenes con ratio horizontal (fotogramas reales, no posters)
+    const horizontalBackdrops = images.backdrops.filter(b => {
+      const ratio = b.width / b.height;
+      return ratio > 1.5;
+    });
 
-    return this.mapToMovie(details, credits, images);
+    // Descartar si no tiene suficientes backdrops horizontales para jugar
+    if (horizontalBackdrops.length < 3) return null;
+
+    return this.mapToMovie(details, credits, { backdrops: horizontalBackdrops });
   }
 
   /**
@@ -126,7 +138,7 @@ const page = await tmdbGet<TmdbDiscoverResponse>('/discover/movie', {
    * Centraliza toda la lógica de mapeo en un único lugar.
    * @param details Respuesta de /movie/{id}
    * @param credits Respuesta de /movie/{id}/credits
-   * @param images Respuesta de /movie/{id}/images
+   * @param images Respuesta de /movie/{id}/images filtrada por ratio horizontal.
    * @returns Entidad Movie lista para usar en la lógica de negocio.
    */
   private mapToMovie(
@@ -142,10 +154,10 @@ const page = await tmdbGet<TmdbDiscoverResponse>('/discover/movie', {
 
     // Ordenar backdrops por vote_average ascendente (más ambiguos primero)
     // y construir las URLs completas
-const backdrops = images.backdrops
-  .sort((a, b) => a.vote_average - b.vote_average)
-  .slice(0, MAX_BACKDROPS)
-  .map(b => `${TMDB_IMAGE_BASE_URL}${b.file_path}`);
+    const backdrops = images.backdrops
+      .sort((a, b) => a.vote_average - b.vote_average)
+      .slice(0, MAX_BACKDROPS)
+      .map(b => `${TMDB_IMAGE_BASE_URL}${b.file_path}`);
 
     return {
       id: details.id,
