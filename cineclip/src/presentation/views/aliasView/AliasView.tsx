@@ -7,23 +7,16 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { loginUser, registerUser } from '../../../di/container';
-import { styles } from './AliasView.styles'
-/**
- * Props de AliasView.
- */
+import { styles } from './AliasView.styles';
+
+
 interface AliasViewProps {
-  /** Función llamada cuando el jugador se autentica correctamente.
-   * Recibe el alias para pasarlo al resto de la app. */
   onRegistered: (alias: string) => void;
 }
 
-/**
- * Modos posibles del formulario.
- * - 'login': el jugador ya tiene cuenta y quiere iniciar sesión.
- * - 'register': el jugador es nuevo y quiere crear una cuenta.
- */
 type FormMode = 'login' | 'register';
 
 /**
@@ -34,9 +27,7 @@ type FormMode = 'login' | 'register';
  * antes de acceder al juego.
  */
 export function AliasView({ onRegistered }: AliasViewProps) {
-  /** Modo actual del formulario: login o registro. */
   const [mode, setMode] = useState<FormMode>('login');
-
   const [alias, setAlias] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,13 +35,10 @@ export function AliasView({ onRegistered }: AliasViewProps) {
 
   /**
    * Gestiona el envío del formulario según el modo activo.
-   * En modo registro crea la cuenta y el perfil del jugador.
-   * En modo login valida las credenciales existentes.
    */
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
-
     try {
       if (mode === 'register') {
         await registerUser.execute(alias, password);
@@ -66,8 +54,7 @@ export function AliasView({ onRegistered }: AliasViewProps) {
   };
 
   /**
-   * Cambia entre modo login y registro.
-   * Limpia los errores y el formulario al cambiar de modo.
+   * Cambia entre modo login y registro limpiando el formulario.
    */
   const toggleMode = () => {
     setMode(prev => prev === 'login' ? 'register' : 'login');
@@ -155,11 +142,15 @@ export function AliasView({ onRegistered }: AliasViewProps) {
               ? '¿No tienes cuenta? Regístrate'
               : '¿Ya tienes cuenta? Inicia sesión'}
           </Text>
-          <Text style={styles.signatureText}>
-  'By Sergio González'
-</Text>
-       
         </TouchableOpacity>
+
+        {/* Logo de autor */}
+     
+{/* Logo de autor */}
+<Image
+  source={require('../../../../assets/SGLogo.png')}
+  style={styles.logo}
+/>
 
       </View>
     </KeyboardAvoidingView>
