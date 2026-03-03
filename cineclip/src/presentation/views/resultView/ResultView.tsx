@@ -4,40 +4,49 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
+  useWindowDimensions,
+  Platform,
 } from 'react-native';
 import { Game } from '../../../domain/entities/Game';
 import { styles } from './ResultView.styles';
-/**
- * Props de ResultView.
- */
+
 interface ResultViewProps {
-  /** Estado final de la partida con todos los datos. */
   game: Game;
-  /** Alias del jugador activo. Se muestra en la cabecera. */
   alias: string;
-  /** Función llamada al pulsar "Jugar de nuevo". */
   onNewGame: () => void;
-  /** Función llamada para navegar al ranking. */
   onGoToRanking: () => void;
-  /** Función llamada para cerrar sesión y volver al login. */
   onLogout: () => void;
 }
 
 /**
  * Vista de resultado de la partida.
- * Muestra el resultado final (GAME OVER o victoria), la puntuación
- * acumulada en la sesión y los metadatos completos de la película
- * que no se pudo adivinar.
- * Responsabilidad única (SOLID - S): solo se ocupa de renderizar
- * el resultado final de la sesión.
+ * Muestra el resultado final, la puntuación acumulada y los
+ * metadatos completos de la película.
+ * Responsabilidad única (SOLID - S): solo renderiza el resultado final.
  */
 export function ResultView({ game, alias, onNewGame, onGoToRanking, onLogout }: ResultViewProps) {
   const isWin = game.result === 'win';
+  const { width } = useWindowDimensions();
+
+  /**
+   * Ancho máximo del contenedor en web según tamaño de pantalla.
+   * Móvil web (<600px): 480px. Tablet/escritorio: 900px.
+   */
+  const containerMaxWidth = Platform.OS === 'web'
+    ? (width < 600 ? 480 : 900)
+    : undefined;
 
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[
+        styles.content,
+        Platform.OS === 'web' && {
+          maxWidth: containerMaxWidth,
+          alignSelf: 'center',
+          width: '100%',
+        },
+      ]}
     >
       {/* Cabecera con usuario y botón de salir */}
       <View style={styles.header}>
@@ -63,8 +72,6 @@ export function ResultView({ game, alias, onNewGame, onGoToRanking, onLogout }: 
             <Text style={styles.gameOverSub}>Has perdido</Text>
           </>
         )}
-
-        {/* Puntuación acumulada de la sesión */}
         <View style={styles.scoreBadge}>
           <Text style={styles.scoreLabel}>PUNTUACIÓN FINAL</Text>
           <Text style={styles.scoreValue}>{game.score}</Text>
@@ -80,7 +87,6 @@ export function ResultView({ game, alias, onNewGame, onGoToRanking, onLogout }: 
         {game.movie.originalTitle !== game.movie.title && (
           <Text style={styles.originalTitle}>({game.movie.originalTitle})</Text>
         )}
-
         <View style={styles.metaRow}>
           <Text style={styles.metaLabel}>Año</Text>
           <Text style={styles.metaValue}>{game.movie.year}</Text>
@@ -103,11 +109,9 @@ export function ResultView({ game, alias, onNewGame, onGoToRanking, onLogout }: 
       <TouchableOpacity style={styles.primaryButton} onPress={onNewGame}>
         <Text style={styles.primaryButtonText}>Jugar de nuevo</Text>
       </TouchableOpacity>
-
       <TouchableOpacity style={styles.secondaryButton} onPress={onGoToRanking}>
         <Text style={styles.secondaryButtonText}>Ver ranking</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 }
-

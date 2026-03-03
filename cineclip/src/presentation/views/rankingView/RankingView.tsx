@@ -5,44 +5,44 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
+  useWindowDimensions,
+  Platform,
 } from 'react-native';
 import { useRanking } from '../../viewModels/useRanking';
 import { Score } from '../../../domain/entities/Score';
 import { styles } from './RankingView.styles';
-/**
- * Props de RankingView.
- */
+
 interface RankingViewProps {
-  /** Alias del jugador activo. Se muestra en la cabecera. */
   alias: string;
-  /** Función llamada para volver a la pantalla anterior. */
   onBack: () => void;
-  /** Función llamada para cerrar sesión y volver al login. */
   onLogout: () => void;
 }
 
 /**
  * Vista del ranking global.
  * Muestra la lista de jugadores ordenada por puntuación descendente.
- * Responsabilidad única (SOLID - S): solo se ocupa de renderizar
- * el ranking que le proporciona el ViewModel useRanking.
+ * Responsabilidad única (SOLID - S): solo renderiza el ranking
+ * que le proporciona el ViewModel useRanking.
  */
 export function RankingView({ alias, onBack, onLogout }: RankingViewProps) {
   const { ranking, loading, error, loadRanking } = useRanking();
+  const { width } = useWindowDimensions();
 
-  /** Cargar el ranking al montar la vista. */
   useEffect(() => {
     loadRanking();
   }, []);
 
   /**
-   * Renderiza una fila del ranking.
-   * Muestra el puesto, el alias y la puntuación máxima.
+   * Ancho máximo del contenedor en web según tamaño de pantalla.
+   * Móvil web (<600px): 480px. Tablet/escritorio: 900px.
    */
+  const containerMaxWidth = Platform.OS === 'web'
+    ? (width < 600 ? 480 : 900)
+    : undefined;
+
   const renderItem = ({ item, index }: { item: Score; index: number }) => {
     const isTop3 = index < 3;
     const medals = ['🥇', '🥈', '🥉'];
-
     return (
       <View style={[styles.row, isTop3 && styles.topRow]}>
         <Text style={styles.position}>
@@ -55,7 +55,14 @@ export function RankingView({ alias, onBack, onLogout }: RankingViewProps) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[
+      styles.container,
+      Platform.OS === 'web' && {
+        maxWidth: containerMaxWidth,
+        alignSelf: 'center',
+        width: '100%',
+      },
+    ]}>
       {/* Cabecera con usuario y botón de salir */}
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack}>
@@ -80,13 +87,11 @@ export function RankingView({ alias, onBack, onLogout }: RankingViewProps) {
         <Text style={styles.tableHeaderText}>Puntos</Text>
       </View>
 
-      {/* Contenido */}
       {loading && (
         <View style={styles.centered}>
           <ActivityIndicator size="large" color="#F9A825" />
         </View>
       )}
-
       {error && (
         <View style={styles.centered}>
           <Text style={styles.errorText}>{error}</Text>
@@ -95,7 +100,6 @@ export function RankingView({ alias, onBack, onLogout }: RankingViewProps) {
           </TouchableOpacity>
         </View>
       )}
-
       {!loading && !error && ranking.length === 0 && (
         <View style={styles.centered}>
           <Text style={styles.emptyText}>
@@ -103,7 +107,6 @@ export function RankingView({ alias, onBack, onLogout }: RankingViewProps) {
           </Text>
         </View>
       )}
-
       {!loading && !error && ranking.length > 0 && (
         <FlatList
           data={ranking}
@@ -115,4 +118,3 @@ export function RankingView({ alias, onBack, onLogout }: RankingViewProps) {
     </View>
   );
 }
-
