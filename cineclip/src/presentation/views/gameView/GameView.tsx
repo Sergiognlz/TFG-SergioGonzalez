@@ -76,12 +76,13 @@ export function GameView({
   const hintsMaxWidth = isLandscape ? 150 : width < 768 ? 160 : 320;
   const hintsFontSize = isLandscape ? 9 : width < 768 ? 10 : 15;
 
-  /** Tamaño del título según plataforma y orientación. */
-  const titleFontSize = Platform.OS === 'web' ? 48 : isLandscape ? 20 : 28;
+const titleFontSize = Platform.OS === 'web'
+  ? (width < 600 ? 22 : 48)
+  : isLandscape ? 20 : 22;
 
-  /** Tamaño de los links del header según plataforma y orientación. */
-  const headerLinkFontSize = Platform.OS === 'web' ? 20 : isLandscape ? 10 : 13;
-
+const headerLinkFontSize = Platform.OS === 'web'
+  ? (width < 600 ? 11 : 20)
+  : isLandscape ? 10 : 11;
   /**
    * Ancho máximo del contenedor en web según tamaño de pantalla.
    * Móvil web (<600px): 480px. Tablet/escritorio: 900px.
