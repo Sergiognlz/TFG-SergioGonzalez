@@ -1,1 +1,3 @@
-https://cineclipsg.netlify.app/
+URL: https://cineclipsg.netlify.app/
+
+APK:https://expo.dev/accounts/sergiognlz/projects/cineclip/builds/6bbff53b-9817-478e-84e9-348238539b82
