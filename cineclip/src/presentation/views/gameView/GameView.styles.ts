@@ -8,12 +8,12 @@ import { StyleSheet } from 'react-native';
  */
 export const styles = StyleSheet.create({
   /** Contenedor principal. Flex column para que el backdrop ocupe el espacio sobrante. */
-  container: {
-    flex: 1,
-    backgroundColor: '#0A0A0F',
-    padding: 16,
-    paddingBottom: 32,
-  },
+ container: {
+  flex: 1,
+  backgroundColor: '#0A0A0F',
+  padding: 16,
+  paddingBottom: 32,
+},
   /** Contenedor centrado para estados de carga y error. */
   centered: {
     flex: 1,

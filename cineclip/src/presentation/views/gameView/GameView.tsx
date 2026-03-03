@@ -15,23 +15,13 @@ import { ScoreCard } from '../../components/ScoreCard/ScoreCard';
 import { Game } from '../../../domain/entities/Game';
 import { styles } from './GameView.styles';
 
-/**
- * Props de GameView.
- */
 interface GameViewProps {
-  /** Alias del jugador activo. */
   alias: string;
-  /** Estado de la partida activa. Null si no hay partida en curso. */
   initialGame: Game | null;
-  /** Puntuación acumulada de la sesión activa. */
   initialSessionScore: number;
-  /** Función llamada cuando cambia el estado del juego para persistirlo en App. */
   onGameStateChange: (game: Game | null, sessionScore: number) => void;
-  /** Función llamada cuando hay game over. */
   onGameOver: (game: Game) => void;
-  /** Función llamada para navegar al ranking. */
   onGoToRanking: () => void;
-  /** Función llamada para cerrar sesión. */
   onLogout: () => void;
 }
 
@@ -61,28 +51,24 @@ export function GameView({
   const { results, searching, search, clearResults } = useSearch();
   const { height, width } = useWindowDimensions();
 
-  /** Solo iniciar partida si no hay ninguna activa. */
   useEffect(() => {
     if (!initialGame) {
       initGame();
     }
   }, []);
 
-  /** Navegar a resultado cuando hay game over. */
   useEffect(() => {
     if (game?.result === 'loss') {
       onGameOver(game);
     }
   }, [game?.result]);
 
-  /** URL del backdrop activo según el índice actual. */
   const currentBackdropUrl = game?.movie.backdrops[game.currentBackdropIndex]
     ?? game?.movie.backdrops[0];
 
   /**
    * Detectar modo horizontal solo en móvil.
-   * En web siempre es false porque el ancho siempre supera al alto
-   * y causaría que los estilos compactos se aplicaran siempre.
+   * En web siempre es false para evitar estilos compactos en escritorio.
    */
   const isLandscape = Platform.OS !== 'web' && width > height;
 
@@ -90,21 +76,23 @@ export function GameView({
   const hintsMaxWidth = isLandscape ? 150 : width < 768 ? 160 : 320;
   const hintsFontSize = isLandscape ? 9 : width < 768 ? 10 : 15;
 
-  /**
-   * Tamaño del título según plataforma y orientación.
-   * En móvil más pequeño para que quepan los links del header.
-   */
+  /** Tamaño del título según plataforma y orientación. */
   const titleFontSize = Platform.OS === 'web' ? 48 : isLandscape ? 20 : 28;
 
-  /**
-   * Tamaño de los links del header según plataforma y orientación.
-   * En móvil más pequeño para que quepan en una línea.
-   */
+  /** Tamaño de los links del header según plataforma y orientación. */
   const headerLinkFontSize = Platform.OS === 'web' ? 20 : isLandscape ? 10 : 13;
 
   /**
-   * En móvil el backdrop tiene altura fija proporcional a la pantalla
-   * para que quepan header y bottomContainer sin espacio negro.
+   * Ancho máximo del contenedor en web según tamaño de pantalla.
+   * Móvil web (<600px): 480px. Tablet/escritorio: 900px.
+   * En móvil nativo no se aplica límite.
+   */
+  const containerMaxWidth = Platform.OS === 'web'
+    ? (width < 600 ? 480 : 900)
+    : undefined;
+
+  /**
+   * En móvil el backdrop tiene altura fija proporcional a la pantalla.
    * En web usa flex:1 para ocupar todo el espacio sobrante disponible.
    */
   const backdropStyle = Platform.OS === 'web'
@@ -115,10 +103,6 @@ export function GameView({
         width: width - 32,
       }];
 
-  /**
-   * Contenido principal calculado antes del return.
-   * Muestra spinner, error o el juego según el estado.
-   */
   const content = loading ? (
     <View style={styles.centered}>
       <ActivityIndicator size="large" color="#FF006E" />
@@ -136,7 +120,15 @@ export function GameView({
       <ActivityIndicator size="large" color="#FF006E" />
     </View>
   ) : (
-    <View style={[styles.container, Platform.OS !== 'web' && { justifyContent: 'space-between' }]}>
+    <View style={[
+      styles.container,
+      Platform.OS !== 'web' && { justifyContent: 'space-between' },
+      Platform.OS === 'web' && {
+        maxWidth: containerMaxWidth,
+        alignSelf: 'center',
+        width: '100%',
+      },
+    ]}>
       {/* Título, usuario y botones de navegación */}
       <View style={[styles.header, isLandscape && { marginBottom: 2 }]}>
         <Text style={[styles.title, { fontSize: titleFontSize }]}>CineClip</Text>
