@@ -3,7 +3,7 @@
     "name": "cineclip",
     "slug": "cineclip",
     "version": "1.0.0",
- "orientation": "default",
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -21,13 +21,19 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.sergiognlz.cineclip"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "5a2ca87f-4fde-43af-a61f-9e67444bb402"
+      }
+    }
   }
 }
