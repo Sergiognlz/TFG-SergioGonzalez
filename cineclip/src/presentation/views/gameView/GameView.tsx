@@ -76,13 +76,25 @@ export function GameView({
   const hintsMaxWidth = isLandscape ? 150 : width < 768 ? 160 : 320;
   const hintsFontSize = isLandscape ? 9 : width < 768 ? 10 : 15;
 
+/** Tamaño del título CineClip según plataforma y tamaño de pantalla.
+ * Web móvil (<600px): 22px para que quepan los links del header.
+ * Web escritorio: 48px tamaño completo.
+ * Móvil nativo landscape: 20px compacto.
+ * Móvil nativo portrait: 22px igual que web móvil.
+ */
 const titleFontSize = Platform.OS === 'web'
-  ? (width < 600 ? 22 : 48)
-  : isLandscape ? 20 : 22;
+  ? (width < 600 ? 22 : 48)   // web móvil : web escritorio
+  : isLandscape ? 20 : 22;     // móvil landscape : móvil portrait
 
+/** Tamaño de los links del header (alias, Ranking, Salir) según plataforma y tamaño.
+ * Web móvil (<600px): 11px para evitar que se salgan de pantalla.
+ * Web escritorio: 20px tamaño completo.
+ * Móvil nativo landscape: 10px compacto.
+ * Móvil nativo portrait: 11px igual que web móvil.
+ */
 const headerLinkFontSize = Platform.OS === 'web'
-  ? (width < 600 ? 11 : 20)
-  : isLandscape ? 10 : 11;
+  ? (width < 600 ? 11 : 20)   // web móvil : web escritorio
+  : isLandscape ? 10 : 11;     // móvil landscape : móvil portrait
   /**
    * Ancho máximo del contenedor en web según tamaño de pantalla.
    * Móvil web (<600px): 480px. Tablet/escritorio: 900px.
