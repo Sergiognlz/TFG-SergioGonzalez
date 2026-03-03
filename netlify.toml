@@ -1,0 +1,4 @@
+[build]
+  base = "cineclip"
+  command = "npx expo export -p web"
+  publish = "cineclip/dist"
