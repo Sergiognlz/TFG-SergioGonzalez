@@ -8,6 +8,7 @@ import { GameView } from './src/presentation/views/gameView/GameView';
 import { ResultView } from './src/presentation/views/resultView/ResultView';
 import { RankingView } from './src/presentation/views/rankingView/RankingView';
 import { Game } from './src/domain/entities/Game';
+import { auth } from './src/infrastructure/config/firebaseConfig';
 
 /**
  * Pantallas posibles de la aplicación.
@@ -53,27 +54,32 @@ export default function App() {
   });
 
   /**
-   * Al arrancar comprueba si hay un alias guardado en AsyncStorage.
+   * Al arrancar escucha el estado de Firebase Auth.
+   * Si hay sesión activa recupera el alias de AsyncStorage y navega al juego.
+   * Si no hay sesión muestra la pantalla de login/registro.
+   * onAuthStateChanged se encarga de detectar la sesión persistida
+   * automáticamente sin necesidad de guardar la contraseña.
    */
   useEffect(() => {
-    const checkSavedAlias = async () => {
-      try {
-        const savedAlias = await AsyncStorage.getItem(ALIAS_KEY);
-        if (savedAlias) {
-          setAlias(savedAlias);
-          setScreen('game');
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        try {
+          const savedAlias = await AsyncStorage.getItem(ALIAS_KEY);
+          if (savedAlias) {
+            setAlias(savedAlias);
+            setScreen('game');
+          }
+        } catch (e) {
+          // Si falla AsyncStorage mostramos la pantalla de alias
         }
-      } catch (e) {
-        // Si falla AsyncStorage mostramos la pantalla de alias
-      } finally {
-        setInitializing(false);
       }
-    };
-    checkSavedAlias();
+      setInitializing(false);
+    });
+    return unsubscribe;
   }, []);
 
   /**
-   * Navega al juego tras registrarse.
+   * Navega al juego tras registrarse o hacer login.
    */
   const handleRegistered = async (registeredAlias: string) => {
     await AsyncStorage.setItem(ALIAS_KEY, registeredAlias);
@@ -112,9 +118,11 @@ export default function App() {
 
   /**
    * Cierra la sesión del jugador actual.
+   * Elimina el alias de AsyncStorage y cierra sesión en Firebase Auth.
    */
   const handleLogout = async () => {
     await AsyncStorage.removeItem(ALIAS_KEY);
+    await auth.signOut();
     setAlias('');
     setLastGame(null);
     setActiveGame(null);
@@ -132,9 +140,7 @@ export default function App() {
   }
 
   return (
-    /** SafeAreaProvider necesario para que SafeAreaView funcione correctamente. */
     <SafeAreaProvider>
-      {/** SafeAreaView respeta la barra de navegación de Android y el notch de iOS. */}
       <SafeAreaView style={{ flex: 1, backgroundColor: '#0A0A0F' }}>
         {screen === 'alias' && (
           <AliasView onRegistered={handleRegistered} />

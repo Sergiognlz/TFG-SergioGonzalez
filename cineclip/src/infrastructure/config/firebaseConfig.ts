@@ -13,13 +13,14 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-
 export const db = getFirestore(app);
 
 /**
  * En web getAuth usa persistencia localStorage por defecto.
- * En móvil initializeAuth sin persistencia explícita también funciona
- * porque la sesión la gestionamos nosotros con AsyncStorage en App.tsx.
+ * En móvil initializeAuth sin persistencia — la sesión se gestiona
+ * mediante el uid guardado en AsyncStorage en App.tsx.
+ * Las reglas de Firestore permiten lectura a cualquier usuario autenticado,
+ * y el login se realiza antes de cualquier consulta.
  */
 export const auth = Platform.OS === 'web'
   ? getAuth(app)
