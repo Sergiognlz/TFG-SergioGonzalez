@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "cineclip",
-    "slug": "cineclip",
+    "slug": "TFG-SergioGonzalez",
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
@@ -25,8 +25,10 @@
       "package": "com.sergiognlz.cineclip"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    },
+  "bundler": "metro",
+  "baseUrl": "./", 
+  "favicon": "./assets/favicon.png"
+},
     "plugins": [
       "expo-font"
     ],
