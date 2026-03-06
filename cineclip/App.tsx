@@ -56,15 +56,26 @@ export default function App() {
   /**
    * Al arrancar escucha el estado de Firebase Auth.
    * Si hay sesión activa recupera el alias de AsyncStorage y navega al juego.
+   * Si AsyncStorage no tiene el alias lo extrae del email de Firebase como fallback.
    * Si no hay sesión muestra la pantalla de login/registro.
-   * onAuthStateChanged se encarga de detectar la sesión persistida
-   * automáticamente sin necesidad de guardar la contraseña.
+   * onAuthStateChanged detecta la sesión persistida automáticamente
+   * gracias a la persistencia configurada con AsyncStorage en firebaseConfig.ts.
    */
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         try {
-          const savedAlias = await AsyncStorage.getItem(ALIAS_KEY);
+          // Intenta recuperar el alias de AsyncStorage
+          let savedAlias = await AsyncStorage.getItem(ALIAS_KEY);
+
+          // Si AsyncStorage no tiene el alias (por ejemplo tras reinstalar la app),
+          // lo extrae directamente del email de Firebase (alias@cineclip.app → alias)
+          if (!savedAlias && user.email) {
+            savedAlias = user.email.replace('@cineclip.app', '');
+            // Lo guarda en AsyncStorage para las próximas veces
+            await AsyncStorage.setItem(ALIAS_KEY, savedAlias);
+          }
+
           if (savedAlias) {
             setAlias(savedAlias);
             setScreen('game');
