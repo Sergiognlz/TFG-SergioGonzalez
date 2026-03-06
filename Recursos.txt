@@ -1,3 +1,5 @@
 URL_Web: https://sergiognlz.github.io/TFG-SergioGonzalez/
 
 APK:https://expo.dev/accounts/sergiognlz/projects/cineclip/builds/f4115e78-f6d9-4b3a-be1f-64f8ba689bc9
+
+Solución al problema de persistencia en Android: Firebase Auth versión 12 tiene una incompatibilidad con el motor Hermes de Expo en Android que impide usar su sistema de persistencia nativo. Lo detecté depurando con ADB. La solución fue implementar persistencia manual: guardo las credenciales en AsyncStorage tras cada login y hago un login silencioso al arrancar la app si Firebase no tiene sesión activa. El logout borra las credenciales antes de llamar a signOut para evitar que se restaure la sesión involuntariamente.
