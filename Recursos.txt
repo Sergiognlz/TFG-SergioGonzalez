@@ -1,3 +1,3 @@
 URL_Web: https://sergiognlz.github.io/TFG-SergioGonzalez/
 
-APK:https://expo.dev/accounts/sergiognlz/projects/cineclip/builds/e9d0bfb1-8cf4-49e4-816f-b570dcf429c7
+APK:https://expo.dev/accounts/sergiognlz/projects/cineclip/builds/ea380a77-2614-4de7-9fdc-b0a5f447d0a6
