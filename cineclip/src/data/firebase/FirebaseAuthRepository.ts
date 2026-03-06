@@ -8,7 +8,7 @@ import { Platform } from 'react-native';
 import { auth } from '../../infrastructure/config/firebaseConfig';
 import { IAuthRepository } from '../../domain/interfaces/repositories/IAuthRepository';
 
-/** Clave para guardar el password cifrado en AsyncStorage. */
+/** Clave para guardar las credenciales en AsyncStorage. */
 const CREDENTIALS_KEY = 'cineclip_credentials';
 
 /**
@@ -120,35 +120,37 @@ export class FirebaseAuthRepository implements IAuthRepository {
    * @throws Error si el alias no existe o la contraseña es incorrecta.
    */
   async login(alias: string, password: string): Promise<void> {
-  try {
-    await signInWithEmailAndPassword(
-      auth,
-      this.aliasToEmail(alias),
-      password,
-    );
-    await this.saveCredentials(alias, password);
-    console.log('✅ Login exitoso, credenciales guardadas para:', alias);
-  } catch (error: any) {
-    console.log('❌ Error en login:', error.code);
-    if (
-      error.code === 'auth/user-not-found' ||
-      error.code === 'auth/wrong-password' ||
-      error.code === 'auth/invalid-credential'
-    ) {
-      throw new Error('Alias o contraseña incorrectos.');
+    try {
+      await signInWithEmailAndPassword(
+        auth,
+        this.aliasToEmail(alias),
+        password,
+      );
+      // Guarda credenciales tras login exitoso para persistir sesión en Android
+      await this.saveCredentials(alias, password);
+    } catch (error: any) {
+      if (
+        error.code === 'auth/user-not-found' ||
+        error.code === 'auth/wrong-password' ||
+        error.code === 'auth/invalid-credential'
+      ) {
+        throw new Error('Alias o contraseña incorrectos.');
+      }
+      throw new Error('Error al iniciar sesión. Inténtalo de nuevo.');
     }
-    throw new Error('Error al iniciar sesión. Inténtalo de nuevo.');
   }
-}
 
   /**
-   * Cierra la sesión del usuario actual en Firebase Authentication
-   * y elimina las credenciales guardadas en AsyncStorage.
+   * Cierra la sesión del usuario actual en Firebase Authentication.
+   * Elimina las credenciales ANTES de cerrar sesión en Firebase para evitar
+   * que onAuthStateChanged intente restaurar la sesión automáticamente
+   * cuando detecte user=null tras el signOut.
    */
   async logout(): Promise<void> {
-    await signOut(auth);
-    // Elimina credenciales al cerrar sesión para que no se restaure automáticamente
+    // Primero borra credenciales para que onAuthStateChanged no las encuentre
     await this.clearCredentials();
+    // Luego cierra sesión en Firebase
+    await signOut(auth);
   }
 
   /**
