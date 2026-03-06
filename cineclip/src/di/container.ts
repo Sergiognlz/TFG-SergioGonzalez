@@ -8,6 +8,7 @@ import { SaveSessionScore } from '../domain/usecases/SaveSessionScore';
 import { LoginUser } from '../domain/usecases/auth/LoginUser';
 import { RegisterUser } from '../domain/usecases/auth/RegisterUser';
 
+
 /**
  * Contenedor de inyección de dependencias manual.
  * Siguiendo el principio de Inversión de Dependencias (SOLID - D),
@@ -28,8 +29,7 @@ const movieRepository = new TmdbMovieRepository();
 const rankingRepository = new FirebaseRankingRepository();
 
 /** Implementación concreta del repositorio de autenticación usando Firebase Auth. */
-const authRepository = new FirebaseAuthRepository();
-
+export const authRepository = new FirebaseAuthRepository();
 // Casos de uso 
 
 /**

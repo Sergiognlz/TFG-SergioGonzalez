@@ -27,9 +27,8 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 
 // En web usa getAuth estándar con persistencia localStorage automática.
-// En Android usa initializeAuth sin persistencia de Firebase —
-// la sesión se mantiene mediante el alias guardado en AsyncStorage en App.tsx
-// y el fallback desde user.email en onAuthStateChanged.
+// En Android usa initializeAuth sin persistencia de Firebase.
+// La sesión se mantiene mediante el alias y password guardados en AsyncStorage.
 export const auth = Platform.OS === 'web'
   ? getAuth(app)
   : initializeAuth(app, {});
