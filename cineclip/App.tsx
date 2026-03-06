@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Platform } from 'react-native';
 import { useFonts, BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { AliasView } from './src/presentation/views/aliasView/AliasView';
@@ -9,6 +9,7 @@ import { ResultView } from './src/presentation/views/resultView/ResultView';
 import { RankingView } from './src/presentation/views/rankingView/RankingView';
 import { Game } from './src/domain/entities/Game';
 import { auth } from './src/infrastructure/config/firebaseConfig';
+import { authRepository } from './src/di/container';
 
 /**
  * Pantallas posibles de la aplicación.
@@ -55,15 +56,22 @@ export default function App() {
 
   /**
    * Al arrancar escucha el estado de Firebase Auth.
-   * Si hay sesión activa recupera el alias de AsyncStorage y navega al juego.
-   * Si AsyncStorage no tiene el alias lo extrae del email de Firebase como fallback.
-   * Si no hay sesión muestra la pantalla de login/registro.
-   * onAuthStateChanged detecta la sesión persistida automáticamente
-   * gracias a la persistencia configurada con AsyncStorage en firebaseConfig.ts.
+   *
+   * Flujo en Android:
+   * 1. Si Firebase tiene sesión activa (improbable sin persistencia nativa),
+   *    recupera el alias de AsyncStorage o lo extrae del email.
+   * 2. Si Firebase NO tiene sesión, intenta restaurarla con las credenciales
+   *    guardadas en AsyncStorage tras el último login exitoso.
+   * 3. Si no hay credenciales guardadas, muestra la pantalla de login.
+   *
+   * Flujo en web:
+   * Firebase gestiona la sesión via localStorage automáticamente,
+   * por lo que onAuthStateChanged siempre recibe el usuario si hay sesión.
    */
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
+        // Firebase tiene sesión activa — recupera el alias
         try {
           // Intenta recuperar el alias de AsyncStorage
           let savedAlias = await AsyncStorage.getItem(ALIAS_KEY);
@@ -80,11 +88,24 @@ export default function App() {
             setAlias(savedAlias);
             setScreen('game');
           }
-        } catch (e) {
-          // Si falla AsyncStorage mostramos la pantalla de alias
+        } catch {
+          // Si falla AsyncStorage mostramos la pantalla de login
         }
-      }
-      setInitializing(false);
+        setInitializing(false);
+ } else if (Platform.OS !== 'web') {
+  try {
+    const saved = await authRepository.getSavedCredentials();
+    console.log('🔍 Credenciales guardadas:', saved ? saved.alias : 'ninguna');
+    if (saved) {
+      console.log('🔄 Intentando login silencioso para:', saved.alias);
+      await authRepository.login(saved.alias, saved.password);
+      return;
+    }
+  } catch (e) {
+    console.log('❌ Login silencioso fallido:', e);
+  }
+  setInitializing(false);
+}
     });
     return unsubscribe;
   }, []);
@@ -93,6 +114,7 @@ export default function App() {
    * Navega al juego tras registrarse o hacer login.
    */
   const handleRegistered = async (registeredAlias: string) => {
+    // Guarda el alias en AsyncStorage para recuperarlo al arrancar
     await AsyncStorage.setItem(ALIAS_KEY, registeredAlias);
     setAlias(registeredAlias);
     setScreen('game');
@@ -129,11 +151,14 @@ export default function App() {
 
   /**
    * Cierra la sesión del jugador actual.
-   * Elimina el alias de AsyncStorage y cierra sesión en Firebase Auth.
+   * Elimina el alias de AsyncStorage, las credenciales guardadas
+   * y cierra sesión en Firebase Auth.
    */
   const handleLogout = async () => {
+    // Elimina el alias guardado en AsyncStorage
     await AsyncStorage.removeItem(ALIAS_KEY);
-    await auth.signOut();
+    // Cierra sesión en Firebase y elimina credenciales guardadas
+    await authRepository.logout();
     setAlias('');
     setLastGame(null);
     setActiveGame(null);

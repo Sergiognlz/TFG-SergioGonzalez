@@ -120,25 +120,26 @@ export class FirebaseAuthRepository implements IAuthRepository {
    * @throws Error si el alias no existe o la contraseña es incorrecta.
    */
   async login(alias: string, password: string): Promise<void> {
-    try {
-      await signInWithEmailAndPassword(
-        auth,
-        this.aliasToEmail(alias),
-        password,
-      );
-      // Guarda credenciales tras login exitoso para persistir sesión en Android
-      await this.saveCredentials(alias, password);
-    } catch (error: any) {
-      if (
-        error.code === 'auth/user-not-found' ||
-        error.code === 'auth/wrong-password' ||
-        error.code === 'auth/invalid-credential'
-      ) {
-        throw new Error('Alias o contraseña incorrectos.');
-      }
-      throw new Error('Error al iniciar sesión. Inténtalo de nuevo.');
+  try {
+    await signInWithEmailAndPassword(
+      auth,
+      this.aliasToEmail(alias),
+      password,
+    );
+    await this.saveCredentials(alias, password);
+    console.log('✅ Login exitoso, credenciales guardadas para:', alias);
+  } catch (error: any) {
+    console.log('❌ Error en login:', error.code);
+    if (
+      error.code === 'auth/user-not-found' ||
+      error.code === 'auth/wrong-password' ||
+      error.code === 'auth/invalid-credential'
+    ) {
+      throw new Error('Alias o contraseña incorrectos.');
     }
+    throw new Error('Error al iniciar sesión. Inténtalo de nuevo.');
   }
+}
 
   /**
    * Cierra la sesión del usuario actual en Firebase Authentication
