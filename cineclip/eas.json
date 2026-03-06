@@ -10,6 +10,9 @@
     },
     "preview": {
       "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
       "env": {
         "EXPO_PUBLIC_TMDB_API_KEY": "919e52ac49a071fcfc4e6583e4d2bbd7"
       }
